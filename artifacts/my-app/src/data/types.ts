@@ -68,6 +68,21 @@ export interface SkillAction {
   interval: number; // ms per action
 }
 
+export interface SkillAction {
+  id: string;
+  name: string;
+  description?: string;
+  icon?: string; // emoji для карточки действия
+  levelRequired: number;
+  xp: number;
+  masteryXp?: number;
+  interval: number; // ms per action
+  // ── НОВОЕ: истощение ресурса (для gathering-нод) ──
+  stockLimit?: number;  // сколько действий можно сделать до истощения
+  respawnMs?: number;   // время восстановления (мс)
+}
+
+
 export interface WoodcuttingTree extends SkillAction {
   logId: string;
   quantity: [number, number]; // [min, max] logs per chop
