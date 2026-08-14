@@ -5,6 +5,7 @@ import { getItem } from '@/data/items';
 import { SkillScreen } from '@/components/skills/SkillScreen';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { ResourceInfo, MiningRock } from '@/data/types';
+import { getSkillIcon, getToolIcon, getItemIcon, UI_ICONS } from '@/lib/icons';
 
 export function MiningPage() {
   const { t } = useTranslation();
@@ -25,7 +26,7 @@ export function MiningPage() {
   const activeRock = activeActionId ? MINING_ROCKS_MAP[activeActionId] : undefined;
   const isTraining = activeSkill === 'mining' && !!activeRock;
 
-  // Информация о ресурсе (руда)
+  // Информация о ресурсе (руда) — для панели CurrentAction
   const activeOreId = activeRock?.oreId ?? null;
   const inInventory = useBankStore(s =>
     activeOreId ? (s.items.find(i => i.itemId === activeOreId)?.quantity ?? 0) : 0
@@ -33,7 +34,7 @@ export function MiningPage() {
 
   const oreItem = activeRock ? getItem(activeRock.oreId) : undefined;
   const resourceInfo: ResourceInfo | undefined = activeRock && oreItem ? {
-    icon: oreItem.icon ?? '🪨',
+    icon: oreItem.icon ?? getItemIcon(activeRock.oreId),
     name: oreItem.name,
     sellValue: oreItem.sellValue,
     xp: activeRock.xp,
@@ -44,7 +45,7 @@ export function MiningPage() {
   // TODO: заменить на данные из toolStore
   const demoTool = {
     name: 'Бронзовая кирка',
-    icon: '⛏️',
+    icon: getToolIcon('mining'),
     tier: 2,
     durability: 140,
     maxDurability: 150,
@@ -55,7 +56,7 @@ export function MiningPage() {
     <SkillScreen
       skillId="mining"
       skillName={t('skill.mining')}
-      skillIcon="⛏️"
+      skillIcon={getSkillIcon('mining')}
       isTraining={isTraining}
       activeAction={activeRock}
       onStop={stopAction}
@@ -69,7 +70,6 @@ export function MiningPage() {
       actions={ROCKS}
       onActionClick={handleActionClick}
       actionsTitle={t('mining.availableRocks')}
-      // 💎 Шанс гема + цена руды на карточке
       renderActionExtra={(action) => {
         const rock = action as MiningRock;
         const ore = getItem(rock.oreId);
@@ -77,12 +77,12 @@ export function MiningPage() {
           <div className="w-full space-y-0.5">
             {rock.gemChance && (
               <div className="text-[10px] font-mono font-bold text-purple-400">
-                💎 {((rock.gemChance ?? 0) * 100).toFixed(1)}% гем
+                {UI_ICONS.gem} {((rock.gemChance ?? 0) * 100).toFixed(1)}% гем
               </div>
             )}
             {ore && (
               <div className="text-[10px] font-mono font-bold text-yellow-400">
-                💰 {ore.sellValue} GP/шт
+                {UI_ICONS.gold} {ore.sellValue} GP/шт
               </div>
             )}
           </div>
