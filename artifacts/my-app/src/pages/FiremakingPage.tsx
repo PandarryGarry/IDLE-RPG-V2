@@ -7,16 +7,17 @@ import { useGameStore } from '@/store/gameStore';
 import { useBankStore } from '@/store/bankStore';
 import { ItemIcon } from '@/components/ItemIcon';
 import { useTranslation } from '@/hooks/useTranslation';
+import { getSkillIcon, getItemIcon } from '@/lib/icons';
 
 export function FiremakingPage() {
   const { t } = useTranslation();
-  
+
   // Селекторы: компонент перерисовывается ТОЛЬКО при изменении этих значений
   const startSkillAction = useGameStore(s => s.startSkillAction);
   const stopAction = useGameStore(s => s.stopAction);
   const activeSkill = useGameStore(s => s.activeSkill);
   const activeActionId = useGameStore(s => s.activeActionId);
-  
+
   // Подписка только на items, а не на весь bankStore
   const bankItems = useBankStore(s => s.items);
 
@@ -39,7 +40,7 @@ export function FiremakingPage() {
 
   return (
     <div className="space-y-4">
-      <SkillHeader skillId="firemaking" skillName={t('skill.firemaking')} skillIcon="🔥" />
+      <SkillHeader skillId="firemaking" skillName={t('skill.firemaking')} skillIcon={getSkillIcon('firemaking')} />
 
       {/* Active Action Panel */}
       <div className="relative bg-card border border-border rounded-2xl p-4 md:p-5 shadow-sm overflow-hidden">
@@ -51,7 +52,7 @@ export function FiremakingPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="text-lg font-bold flex items-center gap-2">
-                  <span className="text-xl animate-pulse">🔥</span> {t('firemaking.burning')} {activeLog.name}
+                  <span className="text-xl animate-pulse">{getSkillIcon('firemaking')}</span> {t('firemaking.burning')} {activeLog.name}
                 </h3>
                 <p className="text-muted-foreground text-sm font-mono mt-0.5">
                   {(activeLog.interval / 1000).toFixed(1)}{t('ui.seconds.abbr')} {t('ui.per.action')}
@@ -68,7 +69,7 @@ export function FiremakingPage() {
           </div>
         ) : (
           <div className="text-center text-muted-foreground flex flex-col items-center gap-2 py-4">
-            <div className="text-4xl opacity-40">🪵</div>
+            <div className="text-4xl opacity-40">{getItemIcon('normal_logs')}</div>
             <p className="text-sm font-medium">{t('firemaking.selectLog')}</p>
           </div>
         )}

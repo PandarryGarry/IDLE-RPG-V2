@@ -7,6 +7,7 @@ import { useGameStore } from '@/store/gameStore';
 import { useUIStore, SkillCategory } from '@/store/uiStore';
 import { SkillId } from '@/data/types';
 import { cn } from '@/lib/utils';
+import { getSkillIcon, getGroupIcon, UI_ICONS } from '@/lib/icons';
 
 interface SkillItem {
   href: string;
@@ -17,22 +18,22 @@ interface SkillItem {
 
 const SKILLS: SkillItem[] = [
   // Gathering
-  { href: '/woodcutting', icon: '🪓', id: 'woodcutting', category: 'gathering' },
-  { href: '/fishing',     icon: '🎣', id: 'fishing',     category: 'gathering' },
-  { href: '/mining',      icon: '⛏️', id: 'mining',      category: 'gathering' },
+  { href: '/woodcutting', icon: getSkillIcon('woodcutting'), id: 'woodcutting', category: 'gathering' },
+  { href: '/fishing',     icon: getSkillIcon('fishing'),     id: 'fishing',     category: 'gathering' },
+  { href: '/mining',      icon: getSkillIcon('mining'),      id: 'mining',      category: 'gathering' },
   // Artisan
-  { href: '/firemaking',  icon: '🔥', id: 'firemaking',  category: 'artisan' },
-  { href: '/cooking',     icon: '🍳', id: 'cooking',     category: 'artisan' },
-  { href: '/smithing',    icon: '🔨', id: 'smithing',    category: 'artisan' },
+  { href: '/firemaking',  icon: getSkillIcon('firemaking'),  id: 'firemaking',  category: 'artisan' },
+  { href: '/cooking',     icon: getSkillIcon('cooking'),     id: 'cooking',     category: 'artisan' },
+  { href: '/smithing',    icon: getSkillIcon('smithing'),    id: 'smithing',    category: 'artisan' },
   // Combat
-  { href: '/combat',      icon: '⚔️', id: 'attack',      category: 'combat' },
+  { href: '/combat',      icon: getSkillIcon('attack'),      id: 'attack',      category: 'combat' },
 ];
 
 const CATEGORIES: { id: SkillCategory; label: string; icon: string }[] = [
-  { id: 'all',       label: 'Все',      icon: '📋' },
-  { id: 'gathering', label: 'Добыча',   icon: '🌲' },
-  { id: 'artisan',   label: 'Ремесло',  icon: '🔨' },
-  { id: 'combat',    label: 'Бой',      icon: '⚔️' },
+  { id: 'all',       label: 'Все',      icon: getGroupIcon('all') },
+  { id: 'gathering', label: 'Добыча',   icon: getGroupIcon('gathering') },
+  { id: 'artisan',   label: 'Ремесло',  icon: getGroupIcon('artisan') },
+  { id: 'combat',    label: 'Бой',      icon: getGroupIcon('combat') },
 ];
 
 export function SideMenu() {
@@ -79,7 +80,7 @@ export function SideMenu() {
                 onClick={closeSideMenu}
                 className="w-10 h-10 flex items-center justify-center rounded-lg bg-background/50 border border-border hover:bg-background transition-colors"
               >
-                <span className="text-xl">✕</span>
+                <span className="text-xl">{UI_ICONS.close}</span>
               </button>
             </div>
 
@@ -124,7 +125,7 @@ export function SideMenu() {
                 onClick={closeSideMenu}
                 className="flex items-center gap-3 p-3 rounded-xl bg-background/50 border border-border hover:bg-background transition-colors"
               >
-                <span className="text-xl">⚙️</span>
+                <span className="text-xl">{UI_ICONS.settings}</span>
                 <span className="font-bold">Настройки</span>
               </Link>
             </div>

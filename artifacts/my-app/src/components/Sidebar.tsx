@@ -7,6 +7,7 @@ import { Settings, Save, Sword, Coins, Backpack } from 'lucide-react';
 import { manualSave } from '@/lib/saveManager';
 import { useNotificationsStore } from '@/store/notificationsStore';
 import { useTranslation } from '@/hooks/useTranslation';
+import { getSkillIcon } from '@/lib/icons';
 
 interface SidebarItemProps {
   href: string;
@@ -18,7 +19,7 @@ interface SidebarItemProps {
 function SidebarItem({ href, icon, label, skillId }: SidebarItemProps) {
   const [location] = useLocation();
   const isActiveRoute = location === href;
-  
+
   const level = usePlayerStore(s => skillId ? s.skills[skillId]?.level : undefined);
   const activeSkill = useGameStore(s => s.activeSkill);
   const isTraining = skillId && activeSkill === skillId;
@@ -34,7 +35,7 @@ function SidebarItem({ href, icon, label, skillId }: SidebarItemProps) {
           <span className="text-xl flex-shrink-0 w-6 flex justify-center">{icon}</span>
           <span className="font-medium text-sm">{label}</span>
         </div>
-        
+
         <div className="flex items-center gap-2">
           {level !== undefined && (
             <span className={`font-mono text-xs font-bold px-1.5 py-0.5 rounded ${
@@ -56,7 +57,7 @@ export function Sidebar() {
   const { t } = useTranslation();
   const combatLevel = usePlayerStore(s => s.combatLevel);
   const notifyInfo = useNotificationsStore(s => s.notifyInfo);
-  
+
   const handleSave = () => {
     manualSave();
     notifyInfo(t('notif.gameSaved'));
@@ -74,27 +75,27 @@ export function Sidebar() {
       </div>
 
       <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 space-y-5 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
-        
+
         {/* COMBAT */}
         <div>
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 px-1">{t('group.combat')}</h3>
-          <SidebarItem href="/combat" icon="⚔️" label={t('nav.combat')} />
+          <SidebarItem href="/combat" icon={getSkillIcon('attack')} label={t('nav.combat')} />
         </div>
 
         {/* GATHERING */}
         <div>
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 px-1">{t('group.gathering')}</h3>
-          <SidebarItem href="/woodcutting" icon="🪓" label={t('skill.woodcutting')} skillId="woodcutting" />
-          <SidebarItem href="/fishing"     icon="🎣" label={t('skill.fishing')}     skillId="fishing" />
-          <SidebarItem href="/mining"      icon="⛏️" label={t('skill.mining')}      skillId="mining" />
+          <SidebarItem href="/woodcutting" icon={getSkillIcon('woodcutting')} label={t('skill.woodcutting')} skillId="woodcutting" />
+          <SidebarItem href="/fishing"     icon={getSkillIcon('fishing')}     label={t('skill.fishing')}     skillId="fishing" />
+          <SidebarItem href="/mining"      icon={getSkillIcon('mining')}      label={t('skill.mining')}      skillId="mining" />
         </div>
 
         {/* ARTISAN */}
         <div>
           <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 px-1">{t('group.artisan')}</h3>
-          <SidebarItem href="/firemaking" icon="🔥" label={t('skill.firemaking')} skillId="firemaking" />
-          <SidebarItem href="/cooking"    icon="🍳" label={t('skill.cooking')}    skillId="cooking" />
-          <SidebarItem href="/smithing"   icon="🔨" label={t('skill.smithing')}   skillId="smithing" />
+          <SidebarItem href="/firemaking" icon={getSkillIcon('firemaking')} label={t('skill.firemaking')} skillId="firemaking" />
+          <SidebarItem href="/cooking"    icon={getSkillIcon('cooking')}    label={t('skill.cooking')}    skillId="cooking" />
+          <SidebarItem href="/smithing"   icon={getSkillIcon('smithing')}   label={t('skill.smithing')}   skillId="smithing" />
         </div>
       </div>
 
@@ -102,7 +103,7 @@ export function Sidebar() {
         <SidebarItem href="/inventory" icon={<Backpack className="w-5 h-5 text-sky-400" />}   label={t('nav.inventory')} />
         <SidebarItem href="/bank"      icon={<Coins    className="w-5 h-5 text-amber-400" />} label={t('nav.bank')} />
         <SidebarItem href="/settings"  icon={<Settings className="w-5 h-5" />}               label={t('nav.settings')} />
-        
+
         <button 
           onClick={handleSave}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground border border-transparent transition-colors mt-2"

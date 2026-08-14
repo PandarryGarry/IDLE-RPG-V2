@@ -7,16 +7,7 @@ import { getLevelProgress } from '@/gameEngine/xpTable';
 import { formatDuration } from '@/lib/utils';
 import { Link } from 'wouter';
 import { useTranslation } from '@/hooks/useTranslation';
-
-const SKILL_ICONS: Record<string, string> = {
-  attack: '⚔️', strength: '💪', defence: '🛡️', hitpoints: '❤️',
-  ranged: '🏹', magic: '🧙', prayer: '🙏', slayer: '💀',
-  woodcutting: '🪓', fishing: '🎣', mining: '⛏️',
-  firemaking: '🔥', cooking: '🍳', smithing: '🔨',
-  fletching: '🏹', crafting: '✂️', runecrafting: '📿', herblore: '🌿',
-  farming: '🌱', agility: '🏃', thieving: '🤫', summoning: '📜',
-  astrology: '⭐', township: '🏘️',
-};
+import { SKILL_ICONS, GROUP_ICONS, UI_ICONS } from '@/lib/icons';
 
 const SKILL_LINKS: Record<string, string> = {
   woodcutting: '/woodcutting', mining: '/mining', fishing: '/fishing',
@@ -76,7 +67,7 @@ const SkillCard = memo(function SkillCard({ skillId }: { skillId: string }) {
           ? 'border-primary ring-1 ring-primary/40 shadow-[0_0_12px_rgba(34,197,94,0.08)]'
           : 'border-border hover:border-primary/40'
       }`}>
-        <CircularProgress progress={progress} level={state.level} icon={SKILL_ICONS[skillId] || '❓'} isActive={isActive} />
+        <CircularProgress progress={progress} level={state.level} icon={SKILL_ICONS[skillId] || UI_ICONS.unknown} isActive={isActive} />
         <span className="font-bold text-[11px] tracking-wide capitalize text-foreground/80 text-center leading-tight">{skillId}</span>
       </div>
     </Link>
@@ -112,7 +103,7 @@ export function DashboardPage() {
       {/* Skill groups */}
       <div>
         <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground mb-3 px-0.5 flex items-center gap-1.5">
-          <span className="text-red-500">⚔️</span> {t('group.combat')}
+          <span className="text-red-500">{GROUP_ICONS.combat}</span> {t('group.combat')}
         </p>
         <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2 md:gap-3">
           {COMBAT_SKILLS.map(id => <SkillCard key={id} skillId={id} />)}
@@ -121,7 +112,7 @@ export function DashboardPage() {
 
       <div>
         <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground mb-3 px-0.5 flex items-center gap-1.5">
-          <span className="text-green-500">🌲</span> {t('group.gathering')}
+          <span className="text-green-500">{GROUP_ICONS.gathering}</span> {t('group.gathering')}
         </p>
         <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2 md:gap-3">
           {GATHERING_SKILLS.map(id => <SkillCard key={id} skillId={id} />)}
@@ -130,7 +121,7 @@ export function DashboardPage() {
 
       <div>
         <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground mb-3 px-0.5 flex items-center gap-1.5">
-          <span className="text-amber-500">⚒️</span> {t('group.artisan')}
+          <span className="text-amber-500">{GROUP_ICONS.artisan}</span> {t('group.artisan')}
         </p>
         <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2 md:gap-3">
           {CRAFTING_SKILLS.map(id => <SkillCard key={id} skillId={id} />)}

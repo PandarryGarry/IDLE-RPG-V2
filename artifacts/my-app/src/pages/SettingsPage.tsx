@@ -3,10 +3,11 @@ import { useSettingsStore } from '@/store/settingsStore';
 import { exportSaveAsFile, importSave, manualSave } from '@/lib/saveManager';
 import { useNotificationsStore } from '@/store/notificationsStore';
 import { useTranslation } from '@/hooks/useTranslation';
+import { UI_ICONS } from '@/lib/icons';
 
 export function SettingsPage() {
   const { t } = useTranslation();
-  
+
   // Точечные селекторы: компонент перерисовывается только при изменении этих значений
   const language = useSettingsStore(s => s.language);
   const autoSaveEnabled = useSettingsStore(s => s.autoSaveEnabled);
@@ -16,7 +17,7 @@ export function SettingsPage() {
   const numberFormat = useSettingsStore(s => s.numberFormat);
   const updateSetting = useSettingsStore(s => s.updateSetting);
   const toggleDarkMode = useSettingsStore(s => s.toggleDarkMode);
-  
+
   const notifyInfo = useNotificationsStore(s => s.notifyInfo);
   const [importString, setImportString] = useState('');
 
@@ -47,7 +48,7 @@ export function SettingsPage() {
       {/* Page title */}
       <div className="bg-card border border-border p-4 md:p-5 rounded-2xl shadow-sm">
         <h1 className="text-2xl font-black tracking-tight flex items-center gap-2">
-          <span className="text-2xl">⚙️</span> {t('settings.title')}
+          <span className="text-2xl">{UI_ICONS.settings}</span> {t('settings.title')}
         </h1>
       </div>
 

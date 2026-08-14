@@ -13,6 +13,7 @@ import { useResourceStore } from './resourceStore';
 import { calcBurnChance, calcXpPerHour } from '../gameEngine/formulas';
 import { getItem } from '../data/items';
 import { chance, randomRange } from '../lib/utils';
+import { UI_ICONS } from '../lib/icons';
 
 export interface ActionResult {
   items: { itemId: string; quantity: number }[];
@@ -205,7 +206,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
           isPaused: false,
         });
         useNotificationsStore.getState().notifyInfo(
-          `⏳ ${WOODCUTTING_TREES_MAP[actionId]?.name ?? actionId} восстанавливается...`
+          `${UI_ICONS.waiting} ${WOODCUTTING_TREES_MAP[actionId]?.name ?? actionId} восстанавливается...`
         );
         return true;
       }
@@ -260,7 +261,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             nextActionTime: now + interval,
           });
           useNotificationsStore.getState().notifyInfo(
-            `✨ ${WOODCUTTING_TREES_MAP[state.activeActionId]?.name ?? state.activeActionId} восстановилось!`
+            `${UI_ICONS.mastery} ${WOODCUTTING_TREES_MAP[state.activeActionId]?.name ?? state.activeActionId} восстановилось!`
           );
         }
       }
@@ -294,7 +295,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       if (!ok && limits.respawnMs) {
         // Нода истощилась — переходим в режим ожидания
         useNotificationsStore.getState().notifyInfo(
-          `⏳ ${WOODCUTTING_TREES_MAP[state.activeActionId]?.name ?? state.activeActionId} истощено. Ожидание восстановления...`
+          `${UI_ICONS.waiting} ${WOODCUTTING_TREES_MAP[state.activeActionId]?.name ?? state.activeActionId} истощено. Ожидание восстановления...`
         );
         set({
           waitingForRespawn: true,
@@ -322,7 +323,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     if (inventoryFull) {
-      notifs.notifyInfo('⚠️ Inventory full! Some items were lost.');
+      notifs.notifyInfo(`${UI_ICONS.warning} Inventory full! Some items were lost.`);
     }
 
     // Add XP

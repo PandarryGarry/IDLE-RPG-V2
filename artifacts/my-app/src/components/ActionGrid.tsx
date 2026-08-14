@@ -8,6 +8,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { getItem } from '@/data/items';
 import { ItemIcon } from '@/components/ItemIcon';
 import { ItemInfoPopover } from '@/components/ItemInfoPopover';
+import { UI_ICONS } from '@/lib/icons';
 
 interface ActionGridProps {
   skillId: SkillId;
@@ -56,11 +57,11 @@ export function ActionGrid({ skillId, actions, onActionClick, renderExtra }: Act
               <h3 className="font-bold text-base leading-tight">{action.name}</h3>
               {isLocked ? (
                 <span className="text-destructive text-[11px] font-bold bg-destructive/10 px-2 py-0.5 rounded-lg whitespace-nowrap">
-                  🔒 {t('ui.level')} {action.levelRequired}
+                  {UI_ICONS.locked} {t('ui.level')} {action.levelRequired}
                 </span>
               ) : (
                 <span className="text-[11px] font-bold text-primary whitespace-nowrap" title={`${t('ui.mastery')} ${masteryLevel}`}>
-                  ✨ {masteryLevel}
+                  {UI_ICONS.mastery} {masteryLevel}
                 </span>
               )}
             </div>

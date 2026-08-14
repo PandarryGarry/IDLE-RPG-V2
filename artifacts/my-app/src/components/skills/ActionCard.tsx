@@ -4,6 +4,7 @@ import { usePlayerStore } from '@/store/playerStore';
 import { useResourceStore } from '@/store/resourceStore';
 import { getToolForLevel } from '@/data/tools';
 import { cn } from '@/lib/utils';
+import { UI_ICONS } from '@/lib/icons';
 
 interface ActionCardProps {
   skillId: SkillId;
@@ -69,7 +70,7 @@ export function ActionCard({ skillId, action, isActive, onClick, renderExtra }: 
       {/* Оверлей восстановления */}
       {depleted && (
         <div className="absolute inset-0 z-10 rounded-2xl bg-black/60 backdrop-blur-[2px] flex flex-col items-center justify-center gap-1">
-          <span className="text-xl">⏳</span>
+          <span className="text-xl">{UI_ICONS.waiting}</span>
           <span className="font-mono text-xs font-bold text-white">{formatCountdown(respawnLeft)}</span>
           <span className="text-[9px] text-muted-foreground uppercase tracking-wider">восстановление</span>
         </div>
@@ -80,7 +81,7 @@ export function ActionCard({ skillId, action, isActive, onClick, renderExtra }: 
         'absolute top-2 right-2 px-1.5 py-0.5 rounded-md text-[10px] font-mono font-bold',
         locked ? 'bg-red-500/15 text-red-400' : 'bg-muted text-muted-foreground'
       )}>
-        {locked ? '🔒 ' : ''}Lv.{action.levelRequired}
+        {locked ? `${UI_ICONS.locked} ` : ''}Lv.{action.levelRequired}
       </div>
 
       {/* Иконка */}
@@ -89,18 +90,24 @@ export function ActionCard({ skillId, action, isActive, onClick, renderExtra }: 
         isActive ? 'bg-primary/10 border-primary/30' : 'bg-background/60 border-border',
         locked && 'grayscale opacity-70'
       )}>
-        {action.icon ?? '❓'}
+        {action.icon ?? UI_ICONS.unknown}
       </div>
 
-      {/* Полоса остатка ресурса (зелёная/жёлтая/красная) */}
+      {/* Полоса остатка ресурса (зелёная/жёлтая/красная) + цифры */}
       {hasStock && !depleted && (
-        <div className="w-full h-1 rounded-full bg-muted overflow-hidden">
-          <div
-            className={cn('h-full transition-all duration-500', stockColor, stockGlow)}
-            style={{ width: `${stockPercent * 100}%` }}
-          />
+        <div className="w-full space-y-0.5">
+          <div className="h-1 rounded-full bg-muted overflow-hidden">
+            <div
+              className={cn('h-full transition-all duration-500', stockColor, stockGlow)}
+              style={{ width: `${stockPercent * 100}%` }}
+            />
+          </div>
+          <p className="text-[9px] font-mono text-muted-foreground text-right leading-none">
+            {remaining}/{stockLimit}
+          </p>
         </div>
       )}
+
 
       {/* Название */}
       <p className={cn(

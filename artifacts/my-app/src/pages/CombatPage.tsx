@@ -9,6 +9,7 @@ import { useBankStore } from '@/store/bankStore';
 import { getItem } from '@/data/items';
 import { EquipSlot } from '@/data/types';
 import { useTranslation } from '@/hooks/useTranslation';
+import { COMBAT_ICONS, getSkillIcon } from '@/lib/icons';
 
 export function CombatPage() {
   const { t } = useTranslation();
@@ -229,7 +230,7 @@ const CombatScreen = memo(function CombatScreen() {
     <div className="bg-card border border-border rounded-2xl p-4 md:p-5 shadow-sm min-h-[280px] flex flex-col relative overflow-hidden">
       {!inCombat ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
-          <div className="text-5xl mb-3 opacity-25">⚔️</div>
+          <div className="text-5xl mb-3 opacity-25">{getSkillIcon('attack')}</div>
           <h2 className="text-xl font-black text-foreground/40">{t('combat.selectArea')}</h2>
         </div>
       ) : (
@@ -250,7 +251,7 @@ const CombatScreen = memo(function CombatScreen() {
             {/* Player */}
             <div className="flex-1 w-full text-center space-y-2">
               <div className="font-bold text-sm text-muted-foreground">{t('combat.you')} (Lvl {combatLevel})</div>
-              <div className="text-4xl md:text-5xl">🧑‍🌾</div>
+              <div className="text-4xl md:text-5xl">{COMBAT_ICONS.player}</div>
               <ProgressBar
                 value={playerHp / playerMaxHp}
                 label={`${playerHp} / ${playerMaxHp}`}
@@ -264,14 +265,14 @@ const CombatScreen = memo(function CombatScreen() {
               />
             </div>
 
-            <div className="text-3xl font-black text-muted-foreground/50 animate-pulse shrink-0">⚔️</div>
+            <div className="text-3xl font-black text-muted-foreground/50 animate-pulse shrink-0">{getSkillIcon('attack')}</div>
 
             {/* Enemy */}
             <div className="flex-1 w-full text-center space-y-2">
               <div className="font-bold text-sm text-muted-foreground">
                 {currentMonster?.name} (Lvl {currentMonster?.combatLevel})
               </div>
-              <div className="text-4xl md:text-5xl">{currentMonster?.isBoss ? '🐉' : '👹'}</div>
+              <div className="text-4xl md:text-5xl">{currentMonster?.isBoss ? COMBAT_ICONS.dragon : COMBAT_ICONS.monster}</div>
               <ProgressBar
                 value={enemyHp / enemyMaxHp}
                 label={`${enemyHp} / ${enemyMaxHp}`}

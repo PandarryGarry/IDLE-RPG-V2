@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { GameNotification, NotificationType, SkillId } from '../data/types';
 import { generateId } from '../lib/utils';
+import { getSkillIcon, UI_ICONS, COMBAT_ICONS } from '../lib/icons';
 
 const MAX_NOTIFICATIONS = 20;
 const AUTO_DISMISS_MS = 4000;
@@ -19,15 +20,6 @@ export interface NotificationsStore {
   notifyCombat: (message: string) => void;
   notifyInfo: (message: string) => void;
 }
-
-const SKILL_ICONS: Partial<Record<SkillId, string>> = {
-  woodcutting: '🪓', fishing: '🎣', firemaking: '🔥', cooking: '🍳',
-  mining: '⛏️', smithing: '🔨', attack: '⚔️', strength: '💪',
-  defence: '🛡️', hitpoints: '❤️', ranged: '🏹', magic: '🧙',
-  prayer: '🙏', slayer: '💀', thieving: '🤫', crafting: '✂️',
-  herblore: '🌿', farming: '🌱', agility: '🏃', fletching: '🏹',
-  runecrafting: '📿', summoning: '📜', astrology: '⭐', township: '🏘️',
-};
 
 export const useNotificationsStore = create<NotificationsStore>((set, get) => ({
   notifications: [],
@@ -56,7 +48,7 @@ export const useNotificationsStore = create<NotificationsStore>((set, get) => ({
   clearAll: () => set({ notifications: [] }),
 
   notifyLevelUp: (skillId, newLevel) => {
-    const icon = SKILL_ICONS[skillId] ?? '⬆️';
+    const icon = getSkillIcon(skillId);
     const skillName = skillId.charAt(0).toUpperCase() + skillId.slice(1);
     get().addNotification('levelup', `${skillName} level up! → ${newLevel}`, {
       icon,
@@ -67,22 +59,22 @@ export const useNotificationsStore = create<NotificationsStore>((set, get) => ({
 
   notifyItem: (itemName, qty, icon) => {
     const msg = qty > 1 ? `${itemName} x${qty}` : itemName;
-    get().addNotification('item', msg, { icon: icon ?? '📦' });
+    get().addNotification('item', msg, { icon: icon ?? UI_ICONS.misc });
   },
 
   notifyMasteryLevelUp: (skillId, actionName, newLevel) => {
     get().addNotification('mastery_levelup', `${actionName} mastery → ${newLevel}`, {
-      icon: '✨',
+      icon: UI_ICONS.mastery,
       skillId,
       level: newLevel,
     });
   },
 
   notifyCombat: (message) => {
-    get().addNotification('combat', message, { icon: '⚔️' });
+    get().addNotification('combat', message, { icon: COMBAT_ICONS.damage });
   },
 
   notifyInfo: (message) => {
-    get().addNotification('info', message, { icon: 'ℹ️' });
+    get().addNotification('info', message, { icon: UI_ICONS.info });
   },
 }));

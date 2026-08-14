@@ -5,6 +5,7 @@ import { useBankStore } from '@/store/bankStore';
 import { useGameStore } from '@/store/gameStore';
 import { useUIStore } from '@/store/uiStore';
 import { cn } from '@/lib/utils';
+import { getSkillIcon, UI_ICONS } from '@/lib/icons';
 
 export function TopBar() {
   const { t } = useTranslation();
@@ -18,26 +19,6 @@ export function TopBar() {
 
   const skillLevel = usePlayerStore(s => activeSkill ? s.skills[activeSkill]?.level ?? 1 : null);
 
-  const getSkillIcon = (skillId: string | null) => {
-    const icons: Record<string, string> = {
-      woodcutting: '🪓',
-      mining: '⛏️',
-      fishing: '🎣',
-      cooking: '🍳',
-      smithing: '🔨',
-      firemaking: '🔥',
-      attack: '⚔️',
-      strength: '💪',
-      defence: '🛡️',
-      hitpoints: '❤️',
-      ranged: '🏹',
-      magic: '✨',
-      prayer: '🙏',
-      slayer: '🗡️',
-    };
-    return skillId ? icons[skillId] ?? '⭐' : null;
-  };
-
   return (
     <header className="sticky top-0 z-30 bg-card/95 backdrop-blur-md border-b border-border">
       <div className="w-full max-w-[1440px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
@@ -50,12 +31,12 @@ export function TopBar() {
               className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg bg-background/50 border border-border hover:bg-background transition-colors"
               aria-label="Открыть меню"
             >
-              <span className="text-xl">☰</span>
+              <span className="text-xl">{UI_ICONS.menu}</span>
             </button>
 
             {/* GP */}
             <div className="flex items-center gap-1.5">
-              <span className="text-lg">💰</span>
+              <span className="text-lg">{UI_ICONS.gold}</span>
               <span className="font-mono text-sm font-bold text-yellow-400">
                 {gp.toLocaleString()}
               </span>
@@ -64,7 +45,7 @@ export function TopBar() {
 
             {/* Банк */}
             <div className="flex items-center gap-1.5 text-sm">
-              <span className="text-lg">🎒</span>
+              <span className="text-lg">{UI_ICONS.inventory}</span>
               <span className="font-mono font-bold">
                 {usedSlots}/{maxSlots}
               </span>

@@ -7,6 +7,7 @@ import { MINING_ROCKS_MAP } from '@/data/mining';
 import { FISHING_SPOTS_MAP } from '@/data/fishing';
 import type { ResourceInfo } from '@/data/types';
 import { cn, formatCompact } from '@/lib/utils';
+import { UI_ICONS } from '@/lib/icons';
 
 interface CurrentActionProps {
   skillIcon: string;
@@ -134,7 +135,7 @@ export function CurrentAction({
 
           <div className="flex flex-col items-center gap-1.5 text-center">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-background to-muted border border-border flex items-center justify-center text-2xl">
-              {toolIcon ?? '🚫'}
+              {toolIcon ?? UI_ICONS.noTool}
             </div>
             <p className="font-bold text-xs leading-tight truncate w-full">
               {toolName ?? 'Нет инструмента'}
@@ -149,7 +150,7 @@ export function CurrentAction({
                     'text-[10px] font-bold',
                     speedBonus > 0 ? 'text-primary' : 'text-red-400'
                   )}>
-                    ⚡ Скорость {speedBonus > 0 ? '+' : ''}{speedBonus}%
+                    {UI_ICONS.speed} Скорость {speedBonus > 0 ? '+' : ''}{speedBonus}%
                   </span>
                 )}
               </div>
@@ -191,8 +192,8 @@ export function CurrentAction({
               <p className="font-bold text-sm truncate">{resName}</p>
               {resourceInfo && (
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  💰 <span className="text-yellow-400 font-bold">{resourceInfo.sellValue} GP</span>
-                  {' · '}⭐ <span className="text-primary font-bold">{resourceInfo.xp} XP</span>
+                  {UI_ICONS.gold} <span className="text-yellow-400 font-bold">{resourceInfo.sellValue} GP</span>
+                  {' · '}{UI_ICONS.xp} <span className="text-primary font-bold">{resourceInfo.xp} XP</span>
                 </p>
               )}
             </div>
@@ -211,15 +212,15 @@ export function CurrentAction({
           {resourceInfo && (
             <div className="space-y-1 pt-1.5 border-t border-border/60">
               <div className="flex items-center justify-between text-[11px]">
-                <span className="text-muted-foreground">🎒 В инвентаре</span>
+                <span className="text-muted-foreground">{UI_ICONS.inventory} В инвентаре</span>
                 <span className="font-mono font-bold">{resourceInfo.inInventory} шт</span>
               </div>
               <div className="flex items-center justify-between text-[11px]">
-                <span className="text-muted-foreground">⛏️ За действие</span>
+                <span className="text-muted-foreground">{UI_ICONS.perAction} За действие</span>
                 <span className="font-mono font-bold">{resourceInfo.qtyPerAction} шт</span>
               </div>
               <div className="flex items-center justify-between text-[11px]">
-                <span className="text-muted-foreground">💎 Цена</span>
+                <span className="text-muted-foreground">{UI_ICONS.gem} Цена</span>
                 <span className="font-mono font-bold text-yellow-400">{formatCompact(totalValue)} GP</span>
               </div>
             </div>
@@ -237,7 +238,7 @@ export function CurrentAction({
             <span className="mr-1">{skillIcon}</span>
             {waitingForRespawn ? (
               <>
-                ⏳ Ожидание восстановления: {resName}
+                {UI_ICONS.waiting} Ожидание восстановления: {resName}
               </>
             ) : (
               <>
@@ -273,14 +274,14 @@ export function CurrentAction({
               style={{ width: `${Math.max(0, 100 - (respawnRemainingMs / respawnMs) * 100)}%` }}
             />
             <span className="absolute inset-0 flex items-center justify-center text-[10px] font-mono font-bold text-amber-200 pointer-events-none drop-shadow-[0_1px_1px_rgba(0,0,0,0.9)] animate-pulse">
-              ⏳ {formatCountdown(respawnRemainingMs)}
+              {UI_ICONS.waiting} {formatCountdown(respawnRemainingMs)}
             </span>
           </div>
         ) : (
           <div className="relative">
             <ActionProgressBar height="h-3" color="green" />
             <span className="absolute inset-0 flex items-center justify-center text-[9px] font-mono font-bold text-white/90 pointer-events-none drop-shadow-[0_1px_1px_rgba(0,0,0,0.9)]">
-              ⏱ {effSec.toFixed(1)}с
+              {UI_ICONS.timer} {effSec.toFixed(1)}с
             </span>
           </div>
         )}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { getItem } from '@/data/items';
 import { formatNumber } from '@/lib/utils';
+import { getItemIcon, UI_ICONS } from '@/lib/icons';
 import {
   Tooltip,
   TooltipContent,
@@ -18,7 +19,7 @@ interface ItemIconProps {
 
 export function ItemIcon({ itemId, size = 'md', quantity, className = '', showTooltip = true }: ItemIconProps) {
   const item = getItem(itemId);
-  
+
   if (!item) return <div className={`bg-muted rounded ${className}`} style={{ width: 32, height: 32 }} />;
 
   const sizeClasses = {
@@ -31,9 +32,12 @@ export function ItemIcon({ itemId, size = 'md', quantity, className = '', showTo
   const badgeSize = size === 'sm' ? 'text-[9px] px-1' : 'text-xs px-1.5';
   const { t } = useTranslation();
 
+  // Цепочка: иконка из данных предмета → иконка из центрального реестра → fallback
+  const iconValue = item.icon || getItemIcon(itemId) || UI_ICONS.misc;
+
   const icon = (
     <div className={`relative flex items-center justify-center bg-accent border border-border rounded shadow-inner ${sizeClasses[size]} ${className}`}>
-      <span>{item.icon || '📦'}</span>
+      <span>{iconValue}</span>
       {quantity !== undefined && (
         <span className={`absolute -bottom-2 -right-2 bg-background border border-border text-primary font-mono font-bold rounded-full ${badgeSize}`}>
           {formatNumber(quantity)}

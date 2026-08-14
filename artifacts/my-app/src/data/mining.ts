@@ -1,15 +1,16 @@
 import type { MiningRock } from './types';
+import { RESOURCE_ICONS } from '@/lib/icons';
 
 export const ROCKS: MiningRock[] = [
-  { id: 'copper_rock',     name: 'Copper Rock',     levelRequired: 1,   xp: 17.5, masteryXp: 3,  interval: 3000, oreId: 'copper_ore'     },
-  { id: 'tin_rock',        name: 'Tin Rock',        levelRequired: 1,   xp: 17.5, masteryXp: 3,  interval: 3000, oreId: 'tin_ore'        },
-  { id: 'iron_rock',       name: 'Iron Rock',       levelRequired: 15,  xp: 30,   masteryXp: 4,  interval: 3500, oreId: 'iron_ore'       },
-  { id: 'coal_rock',       name: 'Coal Rock',       levelRequired: 20,  xp: 40,   masteryXp: 4,  interval: 4000, oreId: 'coal_ore'       },
-  { id: 'gold_rock',       name: 'Gold Rock',       levelRequired: 40,  xp: 65,   masteryXp: 5,  interval: 4500, oreId: 'gold_ore',      gemChance: 0.002 },
-  { id: 'mithril_rock',    name: 'Mithril Rock',    levelRequired: 55,  xp: 80,   masteryXp: 6,  interval: 5000, oreId: 'mithril_ore',   gemChance: 0.003 },
-  { id: 'adamantite_rock', name: 'Adamantite Rock', levelRequired: 70,  xp: 95,   masteryXp: 7,  interval: 5000, oreId: 'adamantite_ore',gemChance: 0.004 },
-  { id: 'runite_rock',     name: 'Runite Rock',     levelRequired: 85,  xp: 130,  masteryXp: 8,  interval: 6000, oreId: 'runite_ore',    gemChance: 0.006 },
-  { id: 'dragonite_rock',  name: 'Dragonite Rock',  levelRequired: 95,  xp: 180,  masteryXp: 10, interval: 7000, oreId: 'dragonite_ore', gemChance: 0.01  },
+  { id: 'copper_rock',     name: 'Copper Rock',     icon: RESOURCE_ICONS.rocks.copper_rock,     levelRequired: 1,  xp: 12,   masteryXp: 3,  interval: 4000,  oreId: 'copper_ore',      stockLimit: 1000, respawnMs: 60_000 },
+  { id: 'tin_rock',        name: 'Tin Rock',        icon: RESOURCE_ICONS.rocks.tin_rock,        levelRequired: 1,  xp: 12,   masteryXp: 3,  interval: 4000,  oreId: 'tin_ore',         stockLimit: 1000, respawnMs: 60_000 },
+  { id: 'iron_rock',       name: 'Iron Rock',       icon: RESOURCE_ICONS.rocks.iron_rock,       levelRequired: 15, xp: 21,   masteryXp: 4,  interval: 5000,  oreId: 'iron_ore',        stockLimit: 750,  respawnMs: 120_000 },
+  { id: 'coal_rock',       name: 'Coal Rock',       icon: RESOURCE_ICONS.rocks.coal_rock,       levelRequired: 20, xp: 28,   masteryXp: 4,  interval: 6000,  oreId: 'coal_ore',        stockLimit: 600,  respawnMs: 180_000 },
+  { id: 'gold_rock',       name: 'Gold Rock',       icon: RESOURCE_ICONS.rocks.gold_rock,       levelRequired: 40, xp: 46,   masteryXp: 5,  interval: 7000,  oreId: 'gold_ore',        gemChance: 0.002, stockLimit: 400, respawnMs: 300_000 },
+  { id: 'mithril_rock',    name: 'Mithril Rock',    icon: RESOURCE_ICONS.rocks.mithril_rock,    levelRequired: 55, xp: 56,   masteryXp: 6,  interval: 8000,  oreId: 'mithril_ore',     gemChance: 0.003, stockLimit: 300, respawnMs: 480_000 },
+  { id: 'adamantite_rock', name: 'Adamantite Rock', icon: RESOURCE_ICONS.rocks.adamantite_rock, levelRequired: 70, xp: 67,   masteryXp: 7,  interval: 9000,  oreId: 'adamantite_ore',  gemChance: 0.004, stockLimit: 200, respawnMs: 720_000 },
+  { id: 'runite_rock',     name: 'Runite Rock',     icon: RESOURCE_ICONS.rocks.runite_rock,     levelRequired: 85, xp: 91,   masteryXp: 8,  interval: 11000, oreId: 'runite_ore',      gemChance: 0.006, stockLimit: 120, respawnMs: 1_080_000 },
+  { id: 'dragonite_rock',  name: 'Dragonite Rock',  icon: RESOURCE_ICONS.rocks.dragonite_rock,  levelRequired: 95, xp: 126,  masteryXp: 10, interval: 13000, oreId: 'dragonite_ore',   gemChance: 0.01,  stockLimit: 60,  respawnMs: 1_500_000 },
 ];
 
 // Gem chances by tier when mining a gem rock

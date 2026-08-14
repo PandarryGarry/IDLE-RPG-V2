@@ -5,6 +5,7 @@ import { getItem } from '@/data/items';
 import { SkillScreen } from '@/components/skills/SkillScreen';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { ResourceInfo, WoodcuttingTree } from '@/data/types';
+import { getSkillIcon, getToolIcon, getItemIcon, UI_ICONS } from '@/lib/icons';
 
 export function WoodcuttingPage() {
   const { t } = useTranslation();
@@ -33,7 +34,7 @@ export function WoodcuttingPage() {
 
   const logItem = activeTree ? getItem(activeTree.logId) : undefined;
   const resourceInfo: ResourceInfo | undefined = activeTree && logItem ? {
-    icon: logItem.icon ?? '🪵',
+    icon: logItem.icon ?? getItemIcon(activeTree.logId),
     name: logItem.name,
     sellValue: logItem.sellValue,
     xp: activeTree.xp,
@@ -46,7 +47,7 @@ export function WoodcuttingPage() {
   // TODO: заменить на данные из toolStore
   const demoTool = {
     name: 'Бронзовый топор',
-    icon: '🪓',
+    icon: getToolIcon('woodcutting'),
     tier: 2,
     durability: 85,
     maxDurability: 150,
@@ -57,7 +58,7 @@ export function WoodcuttingPage() {
     <SkillScreen
       skillId="woodcutting"
       skillName={t('skill.woodcutting')}
-      skillIcon="🪓"
+      skillIcon={getSkillIcon('woodcutting')}
       isTraining={isTraining}
       activeAction={activeTree}
       onStop={stopAction}
@@ -78,7 +79,7 @@ export function WoodcuttingPage() {
         if (!log) return null;
         return (
           <div className="text-[10px] font-mono font-bold text-yellow-400">
-            💰 {log.sellValue} GP/шт
+            {UI_ICONS.gold} {log.sellValue} GP/шт
           </div>
         );
       }}

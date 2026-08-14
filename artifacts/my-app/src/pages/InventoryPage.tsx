@@ -8,10 +8,11 @@ import { formatNumber } from '@/lib/utils';
 import { usePlayerStore } from '@/store/playerStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Link } from 'wouter';
+import { UI_ICONS } from '@/lib/icons';
 
 export function InventoryPage() {
   const { t } = useTranslation();
-  
+
   const getFilteredItems = useBankStore(s => s.getFilteredItems);
   const items = useBankStore(s => s.items);
   const gp = useBankStore(s => s.gp);
@@ -25,7 +26,7 @@ export function InventoryPage() {
   const addItem = useBankStore(s => s.addItem);
   const activeCategory = useBankStore(s => s.activeCategory);
   const setCategory = useBankStore(s => s.setCategory);
-  
+
   const equipItem = usePlayerStore(s => s.equipItem);
 
   const filteredItems = getFilteredItems();
@@ -57,11 +58,11 @@ export function InventoryPage() {
   ] as const;
 
   const CATEGORIES = [
-    { key: 'all',       label: t('inventory.category.all'),       icon: '📦' },
-    { key: 'equipment', label: t('inventory.category.equipment'), icon: '⚔️' },
-    { key: 'resources', label: t('inventory.category.resources'), icon: '🪵' },
-    { key: 'food',      label: t('inventory.category.food'),      icon: '🍖' },
-    { key: 'misc',      label: t('inventory.category.misc'),      icon: '✨' },
+    { key: 'all',       label: t('inventory.category.all'),       icon: UI_ICONS.misc },
+    { key: 'equipment', label: t('inventory.category.equipment'), icon: UI_ICONS.equipment },
+    { key: 'resources', label: t('inventory.category.resources'), icon: UI_ICONS.resources },
+    { key: 'food',      label: t('inventory.category.food'),      icon: UI_ICONS.food },
+    { key: 'misc',      label: t('inventory.category.misc'),      icon: UI_ICONS.mastery },
   ] as const;
 
   const isFull = totalItems >= maxSlots;
@@ -72,7 +73,7 @@ export function InventoryPage() {
       <div className="bg-card border border-border p-4 md:p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm">
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="w-12 h-12 shrink-0 bg-sky-500/10 rounded-xl flex items-center justify-center text-3xl border border-sky-500/20 shadow-inner">
-            🎒
+            {UI_ICONS.inventory}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
@@ -158,7 +159,7 @@ export function InventoryPage() {
       <div className="bg-card border border-border rounded-2xl p-3 md:p-5 shadow-sm min-h-[400px]">
         {filteredItems.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-muted-foreground py-16">
-            <div className="text-5xl mb-3 opacity-20">🎒</div>
+            <div className="text-5xl mb-3 opacity-20">{UI_ICONS.inventory}</div>
             <p className="font-bold text-sm">{t('inventory.empty')}</p>
           </div>
         ) : (
@@ -210,7 +211,7 @@ export function InventoryPage() {
                         )}
                         {slot.locked && (
                           <p className="text-[10px] text-amber-400 font-bold text-center py-1">
-                            🔒 {t('inventory.locked') ?? 'Locked — cannot sell'}
+                            {UI_ICONS.locked} {t('inventory.locked') ?? 'Locked — cannot sell'}
                           </p>
                         )}
                       </div>

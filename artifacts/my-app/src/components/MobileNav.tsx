@@ -7,20 +7,21 @@ import { useGameStore } from '@/store/gameStore';
 import { useUIStore } from '@/store/uiStore';
 import { SkillId } from '@/data/types';
 import { cn } from '@/lib/utils';
+import { getSkillIcon, UI_ICONS } from '@/lib/icons';
 
 interface MobileNavProps {
   className?: string;
 }
 
 const GATHERING_SKILLS = [
-  { href: '/woodcutting', icon: '🪓', id: 'woodcutting' as SkillId },
-  { href: '/fishing',     icon: '🎣', id: 'fishing'     as SkillId },
-  { href: '/mining',      icon: '⛏️', id: 'mining'      as SkillId },
+  { href: '/woodcutting', icon: getSkillIcon('woodcutting'), id: 'woodcutting' as SkillId },
+  { href: '/fishing',     icon: getSkillIcon('fishing'),     id: 'fishing'     as SkillId },
+  { href: '/mining',      icon: getSkillIcon('mining'),      id: 'mining'      as SkillId },
 ];
 const ARTISAN_SKILLS = [
-  { href: '/firemaking', icon: '🔥', id: 'firemaking' as SkillId },
-  { href: '/cooking',    icon: '🍳', id: 'cooking'    as SkillId },
-  { href: '/smithing',   icon: '🔨', id: 'smithing'   as SkillId },
+  { href: '/firemaking', icon: getSkillIcon('firemaking'), id: 'firemaking' as SkillId },
+  { href: '/cooking',    icon: getSkillIcon('cooking'),    id: 'cooking'    as SkillId },
+  { href: '/smithing',   icon: getSkillIcon('smithing'),   id: 'smithing'   as SkillId },
 ];
 const ALL_SKILL_HREFS = [...GATHERING_SKILLS, ...ARTISAN_SKILLS].map(s => s.href);
 const COMBAT_SKILLS_IDS = new Set(['attack','strength','defence','hitpoints','ranged','magic','prayer','slayer']);
@@ -120,7 +121,7 @@ export function MobileNav({ className }: MobileNavProps) {
         )}
       </AnimatePresence>
 
-      {/* Bottom bar — без Home, только основные разделы */}
+      {/* Bottom bar */}
       <motion.nav
         initial={false}
         animate={{ 
@@ -134,8 +135,8 @@ export function MobileNav({ className }: MobileNavProps) {
           className
         )}
       >
-        <NavTab href="/" icon="🏠" label={t('nav.home')} />
-        <NavTab href="/combat" icon="⚔️" label={t('nav.combat')} />
+        <NavTab href="/" icon={UI_ICONS.home} label={t('nav.home')} />
+        <NavTab href="/combat" icon={getSkillIcon('attack')} label={t('nav.combat')} />
 
         {/* Skills toggle */}
         <button
@@ -148,12 +149,12 @@ export function MobileNav({ className }: MobileNavProps) {
           {hasTrainingSkill && (
             <div className="absolute top-2 right-[25%] w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_6px_rgba(34,197,94,1)]" />
           )}
-          <span className="text-[22px] leading-none">⚡</span>
+          <span className="text-[22px] leading-none">{UI_ICONS.skills}</span>
           <span>{t('nav.skills')}</span>
         </button>
 
-        <NavTab href="/inventory" icon="🎒" label={t('nav.inventory')} />
-        <NavTab href="/shop" icon="🏪" label="Магазин" />
+        <NavTab href="/inventory" icon={UI_ICONS.inventory} label={t('nav.inventory')} />
+        <NavTab href="/shop" icon={UI_ICONS.shop} label={t('nav.shop')} />
       </motion.nav>
     </>
   );
