@@ -57,7 +57,7 @@ export function SkillHeader({ skillId, skillName, skillIcon }: SkillHeaderProps)
 
         {/* Level */}
         <div className="shrink-0 text-right">
-          <div className="text-4xl md:text-5xl font-black text-primary leading-none drop-shadow-[0_0_10px_rgba(34,197,94,0.3)]">
+          <div className="text-4xl md:text-5xl font-black text-primary leading-none drop-shadow-[0_0_10px_rgba(34,211,238,0.3)]">
             {level}
           </div>
           <div className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest font-bold mt-0.5">{t('ui.level')}</div>

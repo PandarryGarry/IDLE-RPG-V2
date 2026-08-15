@@ -42,14 +42,14 @@ export function ActionGrid({ skillId, actions, onActionClick, renderExtra }: Act
               isLocked
                 ? 'bg-card/50 border-border/50 opacity-55 grayscale cursor-not-allowed'
                 : isActive
-                  ? 'bg-primary/8 border-primary shadow-[0_0_18px_rgba(34,197,94,0.12)] ring-1 ring-primary/40 cursor-pointer'
+                  ? 'bg-primary/8 border-primary shadow-[0_0_18px_rgba(34,211,238,0.12)] ring-1 ring-primary/40 cursor-pointer'
                   : 'bg-card border-border hover:border-primary/50 cursor-pointer hover:bg-accent/40'
             }`}
             onClick={() => !isLocked && onActionClick(action.id)}
           >
             {/* Active indicator strip */}
             {isActive && (
-              <div className="absolute top-0 right-0 w-1.5 h-full bg-primary rounded-r-2xl shadow-[0_0_12px_rgba(34,197,94,0.8)]" />
+              <div className="absolute top-0 right-0 w-1.5 h-full bg-primary rounded-r-2xl shadow-[0_0_12px_rgba(34,211,238,0.8)]" />
             )}
 
             {/* Header row */}
