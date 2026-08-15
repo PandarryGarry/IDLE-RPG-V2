@@ -11,6 +11,7 @@ import { TopBar } from '@/components/TopBar';
 import { SideMenu } from '@/components/SideMenu';
 import { NotificationToast } from '@/components/NotificationToast';
 import { useUIStore } from '@/store/uiStore';
+import { UI_ICONS } from '@/lib/icons';
 
 import { DashboardPage } from '@/pages/DashboardPage';
 import { WoodcuttingPage } from '@/pages/WoodcuttingPage';
@@ -30,6 +31,17 @@ function NotFound() {
       <div className="text-center space-y-3">
         <h1 className="text-5xl font-black text-destructive">404</h1>
         <p className="text-muted-foreground font-mono text-sm">Area not found</p>
+      </div>
+    </div>
+  );
+}
+
+function ShopStub() {
+  return (
+    <div className="min-h-[40vh] flex items-center justify-center">
+      <div className="text-center space-y-3">
+        <div className="text-5xl">{UI_ICONS.shop}</div>
+        <p className="text-muted-foreground font-mono text-sm">Shop coming soon</p>
       </div>
     </div>
   );
@@ -73,7 +85,7 @@ function Router() {
         {/* NotificationToast — размещаем сразу под TopBar */}
         <NotificationToast />
 
-        <div className="w-full max-w-[1440px] mx-auto px-3 py-4 pb-20 sm:px-4 md:pb-8 md:px-6 lg:px-8">
+        <div className="w-full max-w-[1440px] mx-auto px-3 py-4 pb-20 sm:px-4 md:pb-28 md:px-6 lg:px-8">
           <Switch>
             <Route path="/" component={DashboardPage} />
             <Route path="/woodcutting" component={WoodcuttingPage} />
@@ -85,15 +97,15 @@ function Router() {
             <Route path="/combat" component={CombatPage} />
             <Route path="/inventory" component={InventoryPage} />
             <Route path="/bank" component={BankPage} />
-            <Route path="/shop" component={() => <div className="text-center py-10">🏪 Магазин скоро откроется!</div>} />
+            <Route path="/shop" component={ShopStub} />
             <Route path="/settings" component={SettingsPage} />
             <Route component={NotFound} />
           </Switch>
         </div>
       </main>
 
-      {/* Mobile bottom nav — hidden on desktop */}
-      <MobileNav className="md:hidden" />
+      {/* Док: мобильный + десктопный (адаптивность внутри компонента) */}
+      <MobileNav />
 
       <Toaster />
     </div>

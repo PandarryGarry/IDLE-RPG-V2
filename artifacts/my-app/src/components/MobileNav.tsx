@@ -1,86 +1,107 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'wouter';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useTranslation } from '@/hooks/useTranslation';
-import { usePlayerStore } from '@/store/playerStore';
-import { useGameStore } from '@/store/gameStore';
 import { useUIStore } from '@/store/uiStore';
-import { SkillId } from '@/data/types';
 import { cn } from '@/lib/utils';
-import { getSkillIcon, UI_ICONS } from '@/lib/icons';
+import {
+  Building2, ScrollText, Globe2, PawPrint, Skull,
+  Landmark, Store, Home, Users,
+  BookOpen, MapPin, CalendarDays, Trophy,
+  Map, DoorClosed, Swords, Egg, Shield, BarChart3, Construction,
+} from 'lucide-react';
 
 interface MobileNavProps {
   className?: string;
 }
 
-const GATHERING_SKILLS = [
-  { href: '/woodcutting', icon: getSkillIcon('woodcutting'), id: 'woodcutting' as SkillId },
-  { href: '/fishing',     icon: getSkillIcon('fishing'),     id: 'fishing'     as SkillId },
-  { href: '/mining',      icon: getSkillIcon('mining'),      id: 'mining'      as SkillId },
-];
-const ARTISAN_SKILLS = [
-  { href: '/firemaking', icon: getSkillIcon('firemaking'), id: 'firemaking' as SkillId },
-  { href: '/cooking',    icon: getSkillIcon('cooking'),    id: 'cooking'    as SkillId },
-  { href: '/smithing',   icon: getSkillIcon('smithing'),   id: 'smithing'   as SkillId },
-];
-const ALL_SKILL_HREFS = [...GATHERING_SKILLS, ...ARTISAN_SKILLS].map(s => s.href);
-const COMBAT_SKILLS_IDS = new Set(['attack','strength','defence','hitpoints','ranged','magic','prayer','slayer']);
+// ═══════════════════════════════════════════════════════════════
+// ЗАРИСОВКА БУДУЩИХ СИСТЕМ (каркас на будущее)
+// TODO: перенести названия в i18n при реализации систем
+// ═══════════════════════════════════════════════════════════════
 
-function NavTab({ href, icon, label }: { href: string; icon: string; label: string }) {
-  const [location] = useLocation();
-  const isActive = location === href;
-  return (
-    <Link href={href} className="flex-1">
-      <div className={cn(
-        'h-full flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold transition-colors',
-        isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-      )}>
-        <span className="text-[22px] leading-none">{icon}</span>
-        <span>{label}</span>
-      </div>
-    </Link>
-  );
+type IconType = React.ComponentType<{ className?: string }>;
+
+interface DockSubItem {
+  icon: IconType;
+  label: string;
 }
 
-function SkillChip({ href, icon, id, onNavigate }: { href: string; icon: string; id: SkillId; onNavigate: () => void }) {
-  const [location] = useLocation();
-  const level = usePlayerStore(s => s.skills[id]?.level ?? 1);
-  const activeSkill = useGameStore(s => s.activeSkill);
-  const isActive = location === href;
-  const isTraining = activeSkill === id;
-
-  return (
-    <Link href={href} onClick={onNavigate}>
-      <div className={cn(
-        'relative flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all active:scale-95',
-        isActive ? 'bg-primary/15 border-primary shadow-[0_0_10px_rgba(34,197,94,0.15)]' : 'bg-background/80 border-border'
-      )}>
-        {isTraining && (
-          <div className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_5px_rgba(34,197,94,1)]" />
-        )}
-        <span className="text-2xl leading-none">{icon}</span>
-        <span className={cn('font-mono text-[11px] font-black', isActive ? 'text-primary' : 'text-muted-foreground')}>{level}</span>
-      </div>
-    </Link>
-  );
+interface DockTab {
+  id: string;
+  icon: IconType;
+  label: string;
+  subItems: DockSubItem[];
 }
+
+const DOCK_TABS: DockTab[] = [
+  {
+    id: 'town',
+    icon: Building2,
+    label: 'Town',
+    subItems: [
+      { icon: Landmark, label: 'Bank' },
+      { icon: Store, label: 'Shop' },
+      { icon: Home, label: 'My Home' },
+      { icon: Users, label: 'Guild' },
+    ],
+  },
+  {
+    id: 'quests',
+    icon: ScrollText,
+    label: 'Quests',
+    subItems: [
+      { icon: BookOpen, label: 'Story' },
+      { icon: MapPin, label: 'Side' },
+      { icon: CalendarDays, label: 'Daily' },
+      { icon: Trophy, label: 'Achievements' },
+    ],
+  },
+  {
+    id: 'world',
+    icon: Globe2,
+    label: 'World',
+    subItems: [
+      { icon: Map, label: 'World Map' },
+      { icon: DoorClosed, label: 'Dungeons' },
+      { icon: Swords, label: 'Arena' },
+    ],
+  },
+  {
+    id: 'pets',
+    icon: PawPrint,
+    label: 'Pets',
+    subItems: [
+      { icon: PawPrint, label: 'My Pets' },
+      { icon: Egg, label: 'Hatching' },
+    ],
+  },
+  {
+    id: 'bosses',
+    icon: Skull,
+    label: 'Bosses',
+    subItems: [
+      { icon: Skull, label: 'World Bosses' },
+      { icon: Shield, label: 'Dungeon Bosses' },
+      { icon: BarChart3, label: 'Leaderboard' },
+    ],
+  },
+];
+
+// ═══════════════════════════════════════════════════════════════
+// МОБИЛЬНЫЙ ДОК (адаптивный: edge-to-edge / MacBook-стиль)
+// ═══════════════════════════════════════════════════════════════
 
 export function MobileNav({ className }: MobileNavProps) {
-  const [skillsOpen, setSkillsOpen] = useState(false);
-  const [location] = useLocation();
-  const { t } = useTranslation();
-  const activeSkill = useGameStore(s => s.activeSkill);
+  const [openTab, setOpenTab] = useState<string | null>(null);
   const bottomNavVisible = useUIStore(s => s.bottomNavVisible);
-  const isSkillRoute = ALL_SKILL_HREFS.includes(location);
-  const hasTrainingSkill = activeSkill && !COMBAT_SKILLS_IDS.has(activeSkill);
 
-  const closeSkills = () => setSkillsOpen(false);
+  const activeTab = DOCK_TABS.find(t => t.id === openTab) ?? null;
+  const closePopup = () => setOpenTab(null);
 
   return (
     <>
-      {/* Skills panel slide-up */}
+      {/* ── Попап-подменю выбранной вкладки ── */}
       <AnimatePresence>
-        {skillsOpen && (
+        {activeTab && (
           <>
             <motion.div
               key="overlay"
@@ -89,7 +110,7 @@ export function MobileNav({ className }: MobileNavProps) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
               className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
-              onClick={closeSkills}
+              onClick={closePopup}
             />
             <motion.div
               key="panel"
@@ -97,64 +118,89 @@ export function MobileNav({ className }: MobileNavProps) {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom))] inset-x-0 z-50 bg-card border-t border-border rounded-t-2xl p-4 pb-5 max-h-[75vh] overflow-y-auto overscroll-contain"
+              className={cn(
+                'fixed z-50 bg-card border-border p-4 pb-5 max-h-[70vh] overflow-y-auto overscroll-contain',
+                // mobile: шторка от края до края
+                'bottom-[calc(3.5rem+env(safe-area-inset-bottom))] inset-x-0 border-t rounded-t-2xl',
+                // md+: центрированная карточка над доком
+                'md:bottom-24 md:inset-x-0 md:mx-auto md:max-w-md md:rounded-2xl md:border'
+              )}
             >
               {/* Drag handle */}
-              <div className="w-10 h-1 bg-border rounded-full mx-auto mb-5" />
+              <div className="w-10 h-1 bg-border rounded-full mx-auto mb-4" />
 
-              <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground mb-3 px-1">{t('group.gathering')}</p>
-              <div className="grid grid-cols-3 gap-2 mb-5">
-                {GATHERING_SKILLS.map(s => (
-                  <SkillChip key={s.href} {...s} onNavigate={closeSkills} />
-                ))}
+              {/* Заголовок попапа */}
+              <div className="flex items-center justify-between mb-3 px-1">
+                <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">
+                  {activeTab.label}
+                </p>
+                <span className="text-[8px] px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/30 font-bold uppercase tracking-wider">
+                  Sketch
+                </span>
               </div>
 
-              <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground mb-3 px-1">{t('group.artisan')}</p>
-              <div className="grid grid-cols-3 gap-2 mb-5">
-                {ARTISAN_SKILLS.map(s => (
-                  <SkillChip key={s.href} {...s} onNavigate={closeSkills} />
+              {/* Подпункты-зарисовки (все «в разработке») */}
+              <div className="grid grid-cols-2 gap-2">
+                {activeTab.subItems.map(item => (
+                  <div
+                    key={item.label}
+                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border bg-background/60 opacity-60 cursor-not-allowed select-none"
+                  >
+                    <item.icon className="w-6 h-6 text-muted-foreground" />
+                    <span className="text-[10px] font-bold text-center text-foreground">
+                      {item.label}
+                    </span>
+                    <span className="flex items-center gap-1 text-[8px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold uppercase tracking-wider">
+                      <Construction className="w-2.5 h-2.5" />
+                      In Dev
+                    </span>
+                  </div>
                 ))}
               </div>
-
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      {/* Bottom bar */}
+      {/* ── Сам док ── */}
       <motion.nav
         initial={false}
-        animate={{ 
+        animate={{
           y: bottomNavVisible ? 0 : '100%',
-          opacity: bottomNavVisible ? 1 : 0
+          opacity: bottomNavVisible ? 1 : 0,
         }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
         className={cn(
-          'fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur-md border-t border-border flex items-stretch',
+          'fixed z-40 bg-card/95 backdrop-blur-md border-border flex items-stretch',
+          // mobile: от края до края
+          'bottom-0 inset-x-0 border-t',
           'h-[calc(3.5rem+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)]',
+          // md+: плавающий док как у MacBook (центрирование без translate!)
+          'md:bottom-4 md:mx-auto md:w-fit md:inset-x-0 md:h-16 md:pb-0 md:px-2',
+          'md:rounded-2xl md:border md:shadow-2xl md:shadow-black/50',
           className
         )}
       >
-        <NavTab href="/" icon={UI_ICONS.home} label={t('nav.home')} />
-        <NavTab href="/combat" icon={getSkillIcon('attack')} label={t('nav.combat')} />
-
-        {/* Skills toggle */}
-        <button
-          onClick={() => setSkillsOpen(v => !v)}
-          className={cn(
-            'relative flex-1 flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold transition-colors',
-            isSkillRoute || skillsOpen ? 'text-primary' : 'text-muted-foreground'
-          )}
-        >
-          {hasTrainingSkill && (
-            <div className="absolute top-2 right-[25%] w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_6px_rgba(34,197,94,1)]" />
-          )}
-          <span className="text-[22px] leading-none">{UI_ICONS.skills}</span>
-          <span>{t('nav.skills')}</span>
-        </button>
-
-        <NavTab href="/inventory" icon={UI_ICONS.inventory} label={t('nav.inventory')} />
-        <NavTab href="/shop" icon={UI_ICONS.shop} label={t('nav.shop')} />
+        {DOCK_TABS.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setOpenTab(openTab === tab.id ? null : tab.id)}
+            className={cn(
+              'relative flex-1 md:flex-none md:w-20 flex flex-col items-center justify-center gap-0.5',
+              'text-[11px] font-bold transition-colors',
+              openTab === tab.id ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+            )}
+            title={tab.label}
+          >
+            <span className="relative">
+              <tab.icon className={cn('w-6 h-6', openTab === tab.id ? 'opacity-100' : 'opacity-70')} />
+              {/* Точка «soon» */}
+              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-500/80" />
+            </span>
+            {/* Подпись только на мобильных (на md+ — как MacBook, только иконки) */}
+            <span className="md:hidden">{tab.label}</span>
+          </button>
+        ))}
       </motion.nav>
     </>
   );

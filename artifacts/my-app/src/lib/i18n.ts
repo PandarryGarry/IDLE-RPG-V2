@@ -27,13 +27,20 @@ const en = {
   // ── Skill groups ───────────────────────────────────────────────
   'group.combat': 'Combat', 'group.gathering': 'Gathering',
   'group.artisan': 'Artisan', 'group.support': 'Support',
+  'group.other': 'Other',
 
   // ── Navigation ─────────────────────────────────────────────────
   'nav.home': 'Home', 'nav.skills': 'Skills', 'nav.combat': 'Combat',
   'nav.inventory': 'Inventory', 'nav.bank': 'Bank',
   'nav.settings': 'Settings', 'nav.save': 'Save Game',
-  'nav.shop': 'Shop',
- //─────────────────────────────────────────────────
+  'nav.shop': 'Shop', 'nav.character': 'Character',
+  'nav.navigation': 'Navigation',
+
+  // ── Auth / Player card ────────────────────────────────────────
+  'auth.guest': 'Guest',
+  'auth.login': 'Sign in',
+
+  //─────────────────────────────────────────────────
   'ui.start': 'Start', 'ui.stop': 'Stop', 'ui.level': 'Level',
   'ui.xp': 'XP', 'ui.maxLevel': 'MAX', 'ui.locked': 'Locked',
   'ui.select': 'Select', 'ui.cancel': 'Cancel', 'ui.confirm': 'Confirm',
@@ -174,12 +181,19 @@ const ru: Partial<Record<keyof typeof en, string>> = {
   // ── Skill groups ──────────────────────────────────────────────
   'group.combat': 'Бой', 'group.gathering': 'Добыча',
   'group.artisan': 'Ремесло', 'group.support': 'Поддержка',
+  'group.other': 'Прочее',
 
   // ── Navigation ────────────────────────────────────────────────
   'nav.home': 'Главная', 'nav.skills': 'Навыки', 'nav.combat': 'Бой',
   'nav.inventory': 'Инвентарь', 'nav.bank': 'Банк',
   'nav.settings': 'Настройки', 'nav.save': 'Сохранить',
-  'nav.shop': 'Магазин',
+  'nav.shop': 'Магазин', 'nav.character': 'Герой',
+  'nav.navigation': 'Навигация',
+
+  // ── Auth / Player card ───────────────────────────────────────
+  'auth.guest': 'Гость',
+  'auth.login': 'Войти',
+
   // ── Generic UI ────────────────────────────────────────────────
   'ui.start': 'Начать', 'ui.stop': 'Остановить', 'ui.level': 'Уровень',
   'ui.xp': 'ОП', 'ui.maxLevel': 'МАКС', 'ui.locked': 'Закрыто',

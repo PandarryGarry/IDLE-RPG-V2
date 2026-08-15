@@ -10,9 +10,10 @@ interface TierBadgeProps {
   className?: string;
 }
 
+// sm — один в один как бирка у инструментов (T2 в CurrentAction)
 const SIZE_CLASSES = {
   sm: 'px-1.5 py-0.5 text-[9px]',
-  md: 'px-2 py-1 text-[10px]',
+  md: 'px-2 py-0.5 text-[10px]',
   lg: 'px-2.5 py-1 text-xs',
 };
 
@@ -23,8 +24,7 @@ export function TierBadge({ tier, showLabel = true, showName = false, size = 'sm
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 font-mono font-bold rounded-md',
-        'border border-white/10 text-white shadow-sm',
+        'inline-flex items-center gap-1 font-bold rounded text-white',
         tierData.solidColor,
         SIZE_CLASSES[size],
         className
