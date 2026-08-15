@@ -17,16 +17,16 @@ export interface BankStore {
   activeCategory: CategoryFilter;
 
   // Queries
-  getItemQty: (itemId: string) => number;
-  hasItem: (itemId: string, qty?: number) => boolean;
-  getSlot: (itemId: string) => BankSlot | undefined;
+  getItemQty: (itemId: string, tier?: number) => number;
+  hasItem: (itemId: string, qty?: number, tier?: number) => boolean;
+  getSlot: (itemId: string, tier?: number) => BankSlot | undefined;
   getFilteredItems: () => BankSlot[];
   getUsedSlots: () => number;
 
   // Mutations
-  addItem: (itemId: string, qty: number) => boolean;
-  removeItem: (itemId: string, qty: number) => boolean;
-  removeItems: (items: { itemId: string; quantity: number }[]) => boolean;
+  addItem: (itemId: string, qty: number, tier?: number) => boolean;
+  removeItem: (itemId: string, qty: number, tier?: number) => boolean;
+  removeItems: (items: { itemId: string; quantity: number; tier?: number }[]) => boolean;
   addGp: (amount: number) => void;
   spendGp: (amount: number) => boolean;
   sellItem: (itemId: string, qty: number) => number;
@@ -52,25 +52,25 @@ export const useBankStore = create<BankStore>((set, get) => ({
   activeTab: 0,
   activeCategory: 'all',
 
-  getItemQty: (itemId) => {
-    const slot = get().items.find(s => s.itemId === itemId);
+  getItemQty: (itemId, tier) => {
+    const slot = get().items.find(s => s.itemId === itemId && s.tier === tier);
     return slot?.quantity ?? 0;
   },
 
-  hasItem: (itemId, qty = 1) => get().getItemQty(itemId) >= qty,
+  hasItem: (itemId, qty = 1, tier) => get().getItemQty(itemId, tier) >= qty,
 
-  getSlot: (itemId) => get().items.find(s => s.itemId === itemId),
+  getSlot: (itemId, tier) => get().items.find(s => s.itemId === itemId && s.tier === tier),
 
   getUsedSlots: () => get().items.filter(s => s.quantity > 0).length,
 
   getFilteredItems: () => {
     const { items, searchQuery, sortMode, activeTab, activeCategory } = get();
     let result = items.filter(s => s.quantity > 0);
-    
+
     if (activeTab > 0) {
       result = result.filter(s => s.tab === activeTab);
     }
-    
+
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(s => {
@@ -79,20 +79,19 @@ export const useBankStore = create<BankStore>((set, get) => ({
       });
     }
 
-    // Фильтр по категории
     if (activeCategory !== 'all') {
       result = result.filter(s => {
         const item = getItem(s.itemId);
         if (!item) return false;
-        
+
         const category = item.category;
-        
+
         switch (activeCategory) {
           case 'equipment':
             return ['weapon', 'helm', 'platebody', 'platelegs', 'boots', 'gloves', 
                     'amulet', 'ring', 'shield', 'cape', 'quiver', 'passive'].includes(category);
           case 'resources':
-            return ['ore', 'log', 'raw_fish', 'bar', 'gem', 'herb', 'seed'].includes(category);
+            return ['ore', 'log', 'raw_fish', 'bar', 'gem', 'herb', 'seed', 'charcoal'].includes(category);
           case 'food':
             return ['food', 'cooked_fish', 'potion'].includes(category);
           case 'misc':
@@ -102,7 +101,7 @@ export const useBankStore = create<BankStore>((set, get) => ({
         }
       });
     }
-    
+
     if (sortMode === 'name') {
       result.sort((a, b) => (getItem(a.itemId)?.name ?? '').localeCompare(getItem(b.itemId)?.name ?? ''));
     } else if (sortMode === 'value') {
@@ -120,38 +119,36 @@ export const useBankStore = create<BankStore>((set, get) => ({
         return catA.localeCompare(catB);
       });
     }
-    
+
     return result;
   },
 
-  addItem: (itemId, qty) => {
+  addItem: (itemId, qty, tier) => {
     const { items, maxSlots } = get();
     const item = getItem(itemId);
-    
+
     if (!item) return false;
 
-    // Все предметы стакаются — ищем существующий слот
-    const existingIdx = items.findIndex(s => s.itemId === itemId);
+    // Ищем существующий слот с тем же itemId И тем же tier
+    const existingIdx = items.findIndex(s => s.itemId === itemId && s.tier === tier);
 
     if (existingIdx >= 0) {
-      // Item exists — just increase quantity
       const newItems = [...items];
       newItems[existingIdx] = { ...newItems[existingIdx], quantity: newItems[existingIdx].quantity + qty };
       set({ items: newItems });
       return true;
     }
 
-    // New item — check slot availability
     const usedSlots = items.filter(s => s.quantity > 0).length;
     if (usedSlots >= maxSlots) return false;
 
-    set({ items: [...items, { itemId, quantity: qty, locked: false, tab: 0 }] });
+    set({ items: [...items, { itemId, quantity: qty, locked: false, tab: 0, tier }] });
     return true;
   },
 
-  removeItem: (itemId, qty) => {
+  removeItem: (itemId, qty, tier) => {
     const { items } = get();
-    const idx = items.findIndex(s => s.itemId === itemId);
+    const idx = items.findIndex(s => s.itemId === itemId && s.tier === tier);
     if (idx < 0 || items[idx].quantity < qty) return false;
     const newItems = [...items];
     const newQty = newItems[idx].quantity - qty;
@@ -166,15 +163,15 @@ export const useBankStore = create<BankStore>((set, get) => ({
 
   removeItems: (itemList) => {
     const state = get();
-    
-    for (const { itemId, quantity } of itemList) {
-      if (!state.hasItem(itemId, quantity)) return false;
+
+    for (const { itemId, quantity, tier } of itemList) {
+      if (!state.hasItem(itemId, quantity, tier)) return false;
     }
-    
-    for (const { itemId, quantity } of itemList) {
-      state.removeItem(itemId, quantity);
+
+    for (const { itemId, quantity, tier } of itemList) {
+      state.removeItem(itemId, quantity, tier);
     }
-    
+
     return true;
   },
 
@@ -190,15 +187,14 @@ export const useBankStore = create<BankStore>((set, get) => ({
   sellItem: (itemId, qty) => {
     const item = getItem(itemId);
     if (!item || !item.canSell) return 0;
-    
-    // Проверяем, не заблокирован ли предмет
+
     const slot = get().getSlot(itemId);
     if (slot?.locked) return 0;
-    
+
     const available = get().getItemQty(itemId);
     const sellQty = Math.min(qty, available);
     if (sellQty <= 0) return 0;
-    
+
     get().removeItem(itemId, sellQty);
     const gpGained = item.sellValue * sellQty;
     get().addGp(gpGained);

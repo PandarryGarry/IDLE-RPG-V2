@@ -167,8 +167,9 @@ export function InventoryPage() {
             {filteredItems.map(slot => {
               const item = getItem(slot.itemId);
               if (!item) return null;
+              const displayName = slot.tier ? `${item.name} T${slot.tier}` : item.name;
               return (
-                <div key={slot.itemId} className="relative flex flex-col items-center">
+                <div key={`${slot.itemId}-${slot.tier ?? 0}`} className="relative flex flex-col items-center">
                   {/* Lock indicator on item */}
                   {slot.locked && (
                     <div className="absolute top-1 right-1 z-10 w-5 h-5 bg-amber-500/90 rounded-full flex items-center justify-center shadow-md">
@@ -219,7 +220,7 @@ export function InventoryPage() {
                   >
                     <button
                       type="button"
-                      aria-label={item.name}
+                      aria-label={displayName}
                       className={`rounded-lg transition-all active:scale-95 hover:shadow-[0_0_12px_rgba(34,197,94,0.15)] min-h-[44px] min-w-[44px] ${
                         slot.locked ? 'opacity-80' : ''
                       }`}
@@ -227,6 +228,8 @@ export function InventoryPage() {
                       <ItemIcon
                         itemId={slot.itemId}
                         quantity={slot.quantity}
+                        tier={slot.tier}
+                        showTierBadge={!!slot.tier}
                         size="lg"
                         showTooltip={false}
                         className="aspect-square h-auto w-full cursor-pointer hover:border-primary"
@@ -234,7 +237,7 @@ export function InventoryPage() {
                     </button>
                   </ItemInfoPopover>
                   <span className="text-[10px] text-muted-foreground font-medium truncate w-full text-center px-0.5 block mt-1">
-                    {item.name}
+                    {displayName}
                   </span>
                 </div>
               );

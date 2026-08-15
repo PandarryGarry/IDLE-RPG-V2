@@ -13,6 +13,8 @@ const ITEMS: Record<string, Item> = {
   redwood_logs:   { id: 'redwood_logs',   name: 'Redwood Logs',   category: 'log',   sellValue: 25,   canSell: true,  stackable: true,  icon: getItemIcon('redwood_logs') },
   // ── Ashes ──────────────────────────────────────────────────
   ash:            { id: 'ash',            name: 'Ash',            category: 'ash',   sellValue: 3,    canSell: true,  stackable: true,  icon: getItemIcon('ash') },
+  // ── Charcoal (базовая цена Tier 1, тир определяется в BankSlot) ─
+  charcoal:       { id: 'charcoal',       name: 'Charcoal',       category: 'charcoal', sellValue: 3,    canSell: true,  stackable: true,  icon: getItemIcon('charcoal') },
   // ── Ores (цены выше брёвен — сырьё для крафта) ────────────
   copper_ore:     { id: 'copper_ore',     name: 'Copper Ore',     category: 'ore',   sellValue: 2,    canSell: true,  stackable: true,  icon: getItemIcon('copper_ore') },
   tin_ore:        { id: 'tin_ore',        name: 'Tin Ore',        category: 'ore',   sellValue: 2,    canSell: true,  stackable: true,  icon: getItemIcon('tin_ore') },

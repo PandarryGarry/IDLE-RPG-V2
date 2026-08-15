@@ -20,7 +20,7 @@ export type ItemCategory =
   | 'weapon' | 'helm' | 'platebody' | 'platelegs' | 'boots' | 'gloves'
   | 'amulet' | 'ring' | 'shield' | 'cape'
   | 'food' | 'herb' | 'seed' | 'bar' | 'ore' | 'log' | 'rune'
-  | 'potion' | 'raw_fish' | 'cooked_fish' | 'gem' | 'misc' | 'bone' | 'ash' | 'arrow' | 'tablet';
+  | 'potion' | 'raw_fish' | 'cooked_fish' | 'gem' | 'misc' | 'bone' | 'ash' | 'arrow' | 'tablet' | 'charcoal';
 
 export type EquipSlot = 'helm' | 'platebody' | 'platelegs' | 'boots' | 'gloves' | 'amulet' | 'ring' | 'weapon' | 'shield' | 'cape' | 'quiver' | 'passive';
 
@@ -48,6 +48,8 @@ export interface Item {
   equipSlot?: EquipSlot;
   combatStats?: CombatStats;
   icon?: string; // emoji fallback
+  tier?: number; // 1-8 для предметов с качеством (уголь, инструменты и т.д.)
+  burnDuration?: number; // время удержания жара в секундах (для угля)
 }
 
 export interface SkillState {
@@ -66,22 +68,10 @@ export interface SkillAction {
   xp: number;
   masteryXp?: number;
   interval: number; // ms per action
-}
-
-export interface SkillAction {
-  id: string;
-  name: string;
-  description?: string;
-  icon?: string; // emoji для карточки действия
-  levelRequired: number;
-  xp: number;
-  masteryXp?: number;
-  interval: number; // ms per action
   // ── НОВОЕ: истощение ресурса (для gathering-нод) ──
   stockLimit?: number;  // сколько действий можно сделать до истощения
   respawnMs?: number;   // время восстановления (мс)
 }
-
 
 export interface WoodcuttingTree extends SkillAction {
   logId: string;
@@ -114,7 +104,11 @@ export interface SmithingRecipe extends SkillAction {
 
 export interface FiremakingLog extends SkillAction {
   logId: string;
-  ashId?: string;
+  ashId?: string;           // зола при неудаче (опционально)
+  charcoalId?: string;      // уголь при успехе
+  charcoalTier?: number;    // тир получаемого угля (1-8)
+  successChance?: number;   // 0-1 шанс успешного крафта (по умолчанию 0.75)
+  burnDuration?: number;    // время горения древесины в секундах (для UI)
 }
 
 export interface ThievingTarget extends SkillAction {
@@ -203,6 +197,7 @@ export interface BankSlot {
   quantity: number;
   locked: boolean;
   tab: number;
+  tier?: number; // для предметов с качеством (уголь и т.д.)
 }
 
 export type NotificationType = 'levelup' | 'mastery_levelup' | 'item' | 'combat' | 'info' | 'warning' | 'achievement';

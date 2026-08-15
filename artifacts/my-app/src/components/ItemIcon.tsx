@@ -1,72 +1,46 @@
 import React from 'react';
-import { getItem } from '@/data/items';
-import { formatNumber } from '@/lib/utils';
-import { getItemIcon, UI_ICONS } from '@/lib/icons';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useTranslation } from '@/hooks/useTranslation';
+import { getItemIcon } from '@/lib/icons';
+import { getTierBackground, getTierBorder } from '@/data/tiers';
+import { TierBadge } from '@/components/TierBadge';
+import { cn } from '@/lib/utils';
 
 interface ItemIconProps {
   itemId: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
-  quantity?: number;
+  size?: 'sm' | 'md' | 'lg';
+  tier?: number;
+  showTierBadge?: boolean;
   className?: string;
-  showTooltip?: boolean;
 }
 
-export function ItemIcon({ itemId, size = 'md', quantity, className = '', showTooltip = true }: ItemIconProps) {
-  const item = getItem(itemId);
+const SIZE_CLASSES = {
+  sm: 'w-6 h-6 text-lg',
+  md: 'w-8 h-8 text-2xl',
+  lg: 'w-12 h-12 text-3xl',
+};
 
-  if (!item) return <div className={`bg-muted rounded ${className}`} style={{ width: 32, height: 32 }} />;
-
-  const sizeClasses = {
-    sm: 'w-8 h-8 text-xl',
-    md: 'w-10 h-10 text-2xl',
-    lg: 'w-14 h-14 text-3xl',
-    xl: 'w-16 h-16 text-4xl',
-  };
-
-  const badgeSize = size === 'sm' ? 'text-[9px] px-1' : 'text-xs px-1.5';
-  const { t } = useTranslation();
-
-  // Цепочка: иконка из данных предмета → иконка из центрального реестра → fallback
-  const iconValue = item.icon || getItemIcon(itemId) || UI_ICONS.misc;
-
-  const icon = (
-    <div className={`relative flex items-center justify-center bg-accent border border-border rounded shadow-inner ${sizeClasses[size]} ${className}`}>
-      <span>{iconValue}</span>
-      {quantity !== undefined && (
-        <span className={`absolute -bottom-2 -right-2 bg-background border border-border text-primary font-mono font-bold rounded-full ${badgeSize}`}>
-          {formatNumber(quantity)}
-        </span>
-      )}
-    </div>
-  );
-
-  if (!showTooltip) return icon;
+export function ItemIcon({ itemId, size = 'md', tier, showTierBadge = false, className }: ItemIconProps) {
+  const icon = getItemIcon(itemId);
+  const sizeClass = SIZE_CLASSES[size];
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>{icon}</TooltipTrigger>
-      <TooltipContent className="bg-popover border-border p-3 text-sm shadow-xl">
-        <div className="font-bold text-base mb-1 text-foreground">{item.name}</div>
-        <div className="text-muted-foreground mb-2 max-w-[200px]">
-          {item.description ?? t('inventory.noDescription')}
+    <div className="relative inline-block">
+      <div
+        className={cn(
+          'rounded-lg border flex items-center justify-center shadow-inner',
+          tier
+            ? `${getTierBackground(tier)} ${getTierBorder(tier)}`
+            : 'bg-background/60 border-border',
+          sizeClass,
+          className
+        )}
+      >
+        {icon}
+      </div>
+      {showTierBadge && tier && (
+        <div className="absolute -top-1 -right-1">
+          <TierBadge tier={tier} size="sm" />
         </div>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-2 text-xs">
-          <span className="text-muted-foreground">{t('inventory.sellsFor')}:</span>
-          <span className="text-amber-400 font-mono text-right">{item.sellValue} GP</span>
-          {item.healAmount !== undefined && (
-            <>
-              <span className="text-muted-foreground">{t('inventory.heals')}:</span>
-              <span className="text-green-400 font-mono text-right">{item.healAmount} HP</span>
-            </>
-          )}
-        </div>
-      </TooltipContent>
-    </Tooltip>
+      )}
+    </div>
   );
 }

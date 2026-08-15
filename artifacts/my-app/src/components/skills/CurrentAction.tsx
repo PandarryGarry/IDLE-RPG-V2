@@ -8,6 +8,7 @@ import { FISHING_SPOTS_MAP } from '@/data/fishing';
 import type { ResourceInfo } from '@/data/types';
 import { cn, formatCompact } from '@/lib/utils';
 import { UI_ICONS } from '@/lib/icons';
+import { getTierSolid } from '@/data/tiers';
 
 interface CurrentActionProps {
   skillIcon: string;
@@ -106,14 +107,6 @@ export function CurrentAction({
     return 'bg-red-500';
   };
 
-  const getTierColor = () => {
-    const colors: Record<number, string> = {
-      1: 'bg-stone-600', 2: 'bg-amber-700', 3: 'bg-slate-500', 4: 'bg-slate-300',
-      5: 'bg-blue-500', 6: 'bg-purple-500', 7: 'bg-pink-500', 8: 'bg-orange-500',
-    };
-    return colors[toolTier || 1] || 'bg-stone-600';
-  };
-
   const resIcon = resourceInfo?.icon ?? skillIcon;
   const resName = resourceInfo?.name ?? actionName;
   const totalValue = resourceInfo ? resourceInfo.inInventory * resourceInfo.sellValue : 0;
@@ -142,7 +135,7 @@ export function CurrentAction({
             </p>
             {hasTool && (
               <div className="flex items-center gap-1.5 flex-wrap justify-center">
-                <span className={cn('px-1.5 py-0.5 rounded text-[9px] font-bold text-white', getTierColor())}>
+                <span className={cn('px-1.5 py-0.5 rounded text-[9px] font-bold text-white', getTierSolid(toolTier))}>
                   T{toolTier}
                 </span>
                 {hasSpeedEffect && (

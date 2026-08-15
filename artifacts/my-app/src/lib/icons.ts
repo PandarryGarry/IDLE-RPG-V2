@@ -103,7 +103,7 @@ export const UI_ICONS = {
   xp: '⭐',
   mastery: '✨',
   skills: '⚡️',
-  
+
   // Прочее
   search: '🔍',
   filter: '🔽',
@@ -132,11 +132,14 @@ export const ITEM_ICONS: Record<string, string> = {
   teak_logs: '🪵',
   maple_logs: '🪵',
   mahogany_logs: '🪵',
-  magic_logs: '✨',
+  magic_logs: '🪵',
   redwood_logs: '🪵',
 
   // Ashes
   ash: '⚪',
+
+  // Charcoal
+  charcoal: '⚫',
 
   // Ores
   copper_ore: '🟤',
@@ -284,8 +287,6 @@ export const RESOURCE_ICONS = {
     magic_tree: '🎄',
     redwood_tree: '🌲',
   },
-
-  // В секции ITEM_ICONS добавь после секции "Ores":
 
   // Камни
   rocks: {

@@ -5,7 +5,7 @@ import { MINING_ROCKS_MAP, GEM_DROPS } from '../data/mining';
 import { FISHING_SPOTS_MAP } from '../data/fishing';
 import { COOKING_RECIPES_MAP } from '../data/cooking';
 import { SMITHING_MAP } from '../data/smithing';
-import { FIREMAKING_MAP } from '../data/firemaking';
+import { FIREMAKING_MAP, getBatchTime } from '../data/firemaking';
 import { usePlayerStore } from './playerStore';
 import { useBankStore } from './bankStore';
 import { useNotificationsStore } from './notificationsStore';
@@ -16,7 +16,7 @@ import { chance, randomRange } from '../lib/utils';
 import { UI_ICONS } from '../lib/icons';
 
 export interface ActionResult {
-  items: { itemId: string; quantity: number }[];
+  items: { itemId: string; quantity: number; tier?: number }[];
   xpGained: number;
   masteryXpGained: number;
   bonusXp?: number;
@@ -24,30 +24,24 @@ export interface ActionResult {
 }
 
 export interface GameStore {
-  // Gameplay state
   activeSkill: SkillId | null;
   activeActionId: string | null;
-  actionProgress: number; // 0-1 for progress bar
+  actionProgress: number;
   actionStartTime: number;
   nextActionTime: number;
-  currentActionInterval: number; // ms
-
-  // ── НОВОЕ: режим ожидания восстановления ноды ──
+  currentActionInterval: number;
+  activeMultiplier: number;
   waitingForRespawn: boolean;
-
-  // Meta
   gameMode: GameMode;
   totalPlayTime: number;
   sessionStartTime: number;
   lastSaveTime: number;
   isRunning: boolean;
   isPaused: boolean;
-
-  // XP trackers for current session
   xpGainedThisSession: Partial<Record<SkillId, number>>;
 
-  // Actions
-  startSkillAction: (skillId: SkillId, actionId: string) => boolean;
+  startSkillAction: (skillId: SkillId, actionId: string, multiplier?: number) => boolean;
+  setMultiplier: (multiplier: number) => void;
   stopAction: () => void;
   pauseGame: () => void;
   resumeGame: () => void;
@@ -57,8 +51,6 @@ export interface GameStore {
   loadFromSave: (data: Partial<GameStore>) => void;
 }
 
-// ── Получение данных о ноде (stockLimit, respawnMs) ──
-
 function getNodeLimits(actionId: string): { stockLimit?: number; respawnMs?: number } | null {
   const action = WOODCUTTING_TREES_MAP[actionId]
     ?? MINING_ROCKS_MAP[actionId]
@@ -66,8 +58,6 @@ function getNodeLimits(actionId: string): { stockLimit?: number; respawnMs?: num
   if (!action) return null;
   return { stockLimit: action.stockLimit, respawnMs: action.respawnMs };
 }
-
-// ── Skill action processors ───────────────────────────────────
 
 function processWoodcutting(actionId: string): ActionResult | null {
   const tree = WOODCUTTING_TREES_MAP[actionId];
@@ -83,7 +73,7 @@ function processMining(actionId: string): ActionResult | null {
   if (!rock) return null;
   const playerLevel = usePlayerStore.getState().getSkillLevel('mining');
   if (playerLevel < rock.levelRequired) return null;
-  const items: { itemId: string; quantity: number }[] = [{ itemId: rock.oreId, quantity: 1 }];
+  const items: { itemId: string; quantity: number; tier?: number }[] = [{ itemId: rock.oreId, quantity: 1 }];
   if (rock.gemChance && chance(rock.gemChance)) {
     const totalWeight = GEM_DROPS.reduce((sum, g) => sum + g.weight, 0);
     let rng = Math.random() * totalWeight;
@@ -140,9 +130,23 @@ function processFiremaking(actionId: string): ActionResult | null {
   if (playerLevel < log.levelRequired) return null;
   if (!bankStore.hasItem(log.logId, 1)) return null;
   bankStore.removeItem(log.logId, 1);
-  const items: { itemId: string; quantity: number }[] = [];
-  if (log.ashId) items.push({ itemId: log.ashId, quantity: 1 });
-  return { items, xpGained: log.xp, masteryXpGained: log.masteryXp ?? 3 };
+
+  const successChance = log.successChance ?? 0.75;
+  const success = chance(successChance);
+
+  const items: { itemId: string; quantity: number; tier?: number }[] = [];
+  let xpGained = log.xp;
+  let masteryXp = log.masteryXp ?? 3;
+
+  if (success && log.charcoalId && log.charcoalTier) {
+    items.push({ itemId: log.charcoalId, quantity: 1, tier: log.charcoalTier });
+  } else if (log.ashId) {
+    items.push({ itemId: log.ashId, quantity: 1 });
+    xpGained = Math.max(1, Math.floor(log.xp * 0.3));
+    masteryXp = Math.max(1, Math.floor(masteryXp * 0.5));
+  }
+
+  return { items, xpGained, masteryXpGained: masteryXp };
 }
 
 function processAction(skillId: SkillId, actionId: string): ActionResult | null {
@@ -157,14 +161,18 @@ function processAction(skillId: SkillId, actionId: string): ActionResult | null 
   }
 }
 
-function getActionInterval(skillId: SkillId, actionId: string): number {
+// Интервал действия. Для firemaking учитывает множитель партии.
+function getActionInterval(skillId: SkillId, actionId: string, multiplier = 1): number {
   switch (skillId) {
     case 'woodcutting': return WOODCUTTING_TREES_MAP[actionId]?.interval ?? 3000;
     case 'mining':      return MINING_ROCKS_MAP[actionId]?.interval ?? 3000;
     case 'fishing':     return FISHING_SPOTS_MAP[actionId]?.interval ?? 7000;
     case 'cooking':     return COOKING_RECIPES_MAP[actionId]?.interval ?? 3000;
     case 'smithing':    return SMITHING_MAP[actionId]?.interval ?? 3000;
-    case 'firemaking':  return FIREMAKING_MAP[actionId]?.interval ?? 3000;
+    case 'firemaking': {
+      const base = FIREMAKING_MAP[actionId]?.interval ?? 10000;
+      return getBatchTime(base, multiplier);
+    }
     default: return 3000;
   }
 }
@@ -176,6 +184,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   actionStartTime: 0,
   nextActionTime: 0,
   currentActionInterval: 3000,
+  activeMultiplier: 1,
   waitingForRespawn: false,
   gameMode: 'standard',
   totalPlayTime: 0,
@@ -185,11 +194,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
   isPaused: false,
   xpGainedThisSession: {},
 
-  startSkillAction: (skillId, actionId) => {
-    const interval = getActionInterval(skillId, actionId);
+  startSkillAction: (skillId, actionId, multiplier = 1) => {
+    const interval = getActionInterval(skillId, actionId, multiplier);
     const now = performance.now();
 
-    // Проверяем: если нода истощена — сразу в режим ожидания
     const limits = getNodeLimits(actionId);
     if (limits?.stockLimit && limits.respawnMs) {
       const resourceStore = useResourceStore.getState();
@@ -201,6 +209,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
           actionStartTime: 0,
           nextActionTime: 0,
           currentActionInterval: interval,
+          activeMultiplier: multiplier,
           waitingForRespawn: true,
           isRunning: true,
           isPaused: false,
@@ -219,6 +228,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       actionStartTime: now,
       nextActionTime: now + interval,
       currentActionInterval: interval,
+      activeMultiplier: multiplier,
       waitingForRespawn: false,
       isRunning: true,
       isPaused: false,
@@ -226,11 +236,28 @@ export const useGameStore = create<GameStore>((set, get) => ({
     return true;
   },
 
+  setMultiplier: (multiplier) => {
+    const state = get();
+    if (!state.activeSkill || !state.activeActionId) return;
+
+    const newInterval = getActionInterval(state.activeSkill, state.activeActionId, multiplier);
+    const now = performance.now();
+    const elapsed = now - state.actionStartTime;
+    const remainingTime = Math.max(0, newInterval - elapsed);
+
+    set({
+      activeMultiplier: multiplier,
+      currentActionInterval: newInterval,
+      nextActionTime: now + remainingTime,
+    });
+  },
+
   stopAction: () => {
     set({
       activeSkill: null,
       activeActionId: null,
       actionProgress: 0,
+      activeMultiplier: 1,
       waitingForRespawn: false,
       isRunning: false,
     });
@@ -246,13 +273,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const resourceStore = useResourceStore.getState();
 
-    // ── Режим ожидания восстановления ноды ──
     if (state.waitingForRespawn) {
       const limits = getNodeLimits(state.activeActionId);
       if (limits?.stockLimit && limits.respawnMs) {
         const stillDepleted = resourceStore.isDepleted(state.activeActionId, limits.respawnMs);
         if (!stillDepleted) {
-          // Нода восстановилась — автоматически возобновляем
           const interval = state.currentActionInterval;
           set({
             waitingForRespawn: false,
@@ -265,35 +290,28 @@ export const useGameStore = create<GameStore>((set, get) => ({
           );
         }
       }
-      // В режиме ожидания ничего больше не делаем
       return;
     }
 
-    // Update progress bar
     const elapsed = now - state.actionStartTime;
     const progress = Math.min(elapsed / state.currentActionInterval, 1);
     set({ actionProgress: progress });
 
     if (now < state.nextActionTime) return;
 
-    // Process action
     const result = processAction(state.activeSkill, state.activeActionId);
 
     if (result === null) {
-      // Action failed — stop
-      set({ isRunning: false, actionProgress: 0, waitingForRespawn: false });
+      set({ isRunning: false, actionProgress: 0, waitingForRespawn: false, activeMultiplier: 1 });
       useNotificationsStore.getState().notifyInfo('Not enough resources or level too low. Action stopped.');
       return;
     }
 
-      // ── Записываем добычу в resourceStore (уменьшаем остаток ноды) ──
-      // +1 ДЕЙСТВИЕ к счётчику ноды (stockLimit считает действия, а не предметы)
-      const limits = getNodeLimits(state.activeActionId);
-      if (limits?.stockLimit) {
-        const ok = resourceStore.recordHarvest(state.activeActionId, 1, limits.stockLimit);
+    const limits = getNodeLimits(state.activeActionId);
+    if (limits?.stockLimit) {
+      const ok = resourceStore.recordHarvest(state.activeActionId, 1, limits.stockLimit);
 
       if (!ok && limits.respawnMs) {
-        // Нода истощилась — переходим в режим ожидания
         useNotificationsStore.getState().notifyInfo(
           `${UI_ICONS.waiting} ${WOODCUTTING_TREES_MAP[state.activeActionId]?.name ?? state.activeActionId} истощено. Ожидание восстановления...`
         );
@@ -303,17 +321,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
           actionStartTime: 0,
           nextActionTime: 0,
         });
-        // При этом результат действия (items/xp) всё равно применяем ниже
       }
     }
 
-    // Add items to bank
     const bankStore = useBankStore.getState();
     const notifs = useNotificationsStore.getState();
     let inventoryFull = false;
 
-    for (const { itemId, quantity } of result.items) {
-      const added = bankStore.addItem(itemId, quantity);
+    for (const { itemId, quantity, tier } of result.items) {
+      const added = bankStore.addItem(itemId, quantity, tier);
       if (added && quantity > 0) {
         const item = getItem(itemId);
         if (item) notifs.notifyItem(item.name, quantity, item.icon);
@@ -326,7 +342,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       notifs.notifyInfo(`${UI_ICONS.warning} Inventory full! Some items were lost.`);
     }
 
-    // Add XP
     if (result.xpGained > 0) {
       const { leveledUp, newLevel } = usePlayerStore.getState().addXp(state.activeSkill, result.xpGained);
       if (leveledUp) {
@@ -334,7 +349,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     }
 
-    // Add mastery XP
     if (result.masteryXpGained > 0) {
       const playerStore = usePlayerStore.getState();
       const oldMastery = playerStore.getMasteryLevel(state.activeSkill, state.activeActionId);
@@ -345,11 +359,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     }
 
-    // Update XP tracker
     const xpGainedThisSession = { ...state.xpGainedThisSession };
     xpGainedThisSession[state.activeSkill] = (xpGainedThisSession[state.activeSkill] ?? 0) + result.xpGained;
 
-    // Schedule next action (если не ушли в режим ожидания)
     if (!get().waitingForRespawn) {
       set({
         actionProgress: 0,
@@ -369,6 +381,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   reset: () => set({
     activeSkill: null, activeActionId: null, actionProgress: 0,
     actionStartTime: 0, nextActionTime: 0, currentActionInterval: 3000,
+    activeMultiplier: 1,
     waitingForRespawn: false,
     totalPlayTime: 0, sessionStartTime: Date.now(), lastSaveTime: Date.now(),
     isRunning: false, isPaused: false, xpGainedThisSession: {},
