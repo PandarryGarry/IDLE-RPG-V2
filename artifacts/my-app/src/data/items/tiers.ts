@@ -3,28 +3,36 @@
 // ТОЛЬКО нумерация (бирка T1-T12) для экипировки/оружия/инструментов.
 // Бонусов тиры НЕ дают — это просто визуальная метка уровня предмета.
 // Качество и бонусы определяются ГРЕЙДОМ (grade).
+//
+// Универсальный нейтральный стиль: тёмно-серая бирка с тонким
+// светлым ring, читается поверх любого грейда.
 // ═══════════════════════════════════════════════════════════════
 
 export interface TierConfig {
   id: number;
   name: string;
-  badgeBgColor: string;    // фон бирки (T1, T2...)
-  badgeTextColor: string;  // текст на бирке
+  badgeBgColor: string;
+  badgeTextColor: string;
 }
 
+const BADGE_STYLE = {
+  badgeBgColor: 'bg-zinc-800/95 ring-1 ring-zinc-400/70',
+  badgeTextColor: 'text-zinc-100',
+};
+
 export const TIERS: Record<number, TierConfig> = {
-  1:  { id: 1,  name: 'Tier 1',  badgeBgColor: 'bg-slate-600',   badgeTextColor: 'text-slate-100' },
-  2:  { id: 2,  name: 'Tier 2',  badgeBgColor: 'bg-green-600',   badgeTextColor: 'text-green-100' },
-  3:  { id: 3,  name: 'Tier 3',  badgeBgColor: 'bg-blue-600',    badgeTextColor: 'text-blue-100' },
-  4:  { id: 4,  name: 'Tier 4',  badgeBgColor: 'bg-purple-600',  badgeTextColor: 'text-purple-100' },
-  5:  { id: 5,  name: 'Tier 5',  badgeBgColor: 'bg-amber-600',   badgeTextColor: 'text-amber-100' },
-  6:  { id: 6,  name: 'Tier 6',  badgeBgColor: 'bg-red-600',     badgeTextColor: 'text-red-100' },
-  7:  { id: 7,  name: 'Tier 7',  badgeBgColor: 'bg-pink-600',    badgeTextColor: 'text-pink-100' },
-  8:  { id: 8,  name: 'Tier 8',  badgeBgColor: 'bg-cyan-600',    badgeTextColor: 'text-cyan-100' },
-  9:  { id: 9,  name: 'Tier 9',  badgeBgColor: 'bg-indigo-600',  badgeTextColor: 'text-indigo-100' },
-  10: { id: 10, name: 'Tier 10', badgeBgColor: 'bg-orange-600',  badgeTextColor: 'text-orange-100' },
-  11: { id: 11, name: 'Tier 11', badgeBgColor: 'bg-emerald-600', badgeTextColor: 'text-emerald-100' },
-  12: { id: 12, name: 'Tier 12', badgeBgColor: 'bg-rose-600',    badgeTextColor: 'text-rose-100' },
+  1:  { id: 1,  name: 'Tier 1',  ...BADGE_STYLE },
+  2:  { id: 2,  name: 'Tier 2',  ...BADGE_STYLE },
+  3:  { id: 3,  name: 'Tier 3',  ...BADGE_STYLE },
+  4:  { id: 4,  name: 'Tier 4',  ...BADGE_STYLE },
+  5:  { id: 5,  name: 'Tier 5',  ...BADGE_STYLE },
+  6:  { id: 6,  name: 'Tier 6',  ...BADGE_STYLE },
+  7:  { id: 7,  name: 'Tier 7',  ...BADGE_STYLE },
+  8:  { id: 8,  name: 'Tier 8',  ...BADGE_STYLE },
+  9:  { id: 9,  name: 'Tier 9',  ...BADGE_STYLE },
+  10: { id: 10, name: 'Tier 10', ...BADGE_STYLE },
+  11: { id: 11, name: 'Tier 11', ...BADGE_STYLE },
+  12: { id: 12, name: 'Tier 12', ...BADGE_STYLE },
 };
 
 export function getTierConfig(tier: number | undefined): TierConfig | null {
@@ -33,3 +41,15 @@ export function getTierConfig(tier: number | undefined): TierConfig | null {
 }
 
 export const MAX_TIER = 12;
+
+/**
+ * Слоты рун по тиру (только для экипировки/оружия).
+ * Тиры 1-3 → 0, 4-6 → 1, 7-9 → 2, 10-12 → 3.
+ */
+export function getRuneSlotsForTier(tier: number | undefined): number {
+  if (!tier) return 0;
+  if (tier >= 10) return 3;
+  if (tier >= 7) return 2;
+  if (tier >= 4) return 1;
+  return 0;
+}

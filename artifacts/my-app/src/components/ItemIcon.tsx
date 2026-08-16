@@ -1,6 +1,6 @@
 import React from 'react';
 import { getItemIcon } from '@/lib/icons';
-import { getTierBackground, getTierBorder } from '@/data/tiers';
+import { getTierConfig } from '@/data/items/tiers';
 import { TierBadge } from '@/components/TierBadge';
 import { cn } from '@/lib/utils';
 
@@ -21,14 +21,15 @@ const SIZE_CLASSES = {
 export function ItemIcon({ itemId, size = 'md', tier, showTierBadge = false, className }: ItemIconProps) {
   const icon = getItemIcon(itemId);
   const sizeClass = SIZE_CLASSES[size];
+  const tierCfg = getTierConfig(tier);
 
   return (
     <div className="relative inline-block">
       <div
         className={cn(
           'rounded-lg border flex items-center justify-center shadow-inner',
-          tier
-            ? `${getTierBackground(tier)} ${getTierBorder(tier)}`
+          tierCfg
+            ? `${tierCfg.badgeBgColor} border-zinc-400/40`
             : 'bg-background/60 border-border',
           sizeClass,
           className

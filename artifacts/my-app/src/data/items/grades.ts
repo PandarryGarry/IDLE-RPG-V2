@@ -52,3 +52,16 @@ export function getGradeConfig(grade: GradeId | undefined): GradeConfig | null {
   if (!grade) return null;
   return GRADES[grade] ?? null;
 }
+
+
+/**
+ * Слоты рун по тиру (только для экипировки/оружия).
+ * Тиры 1-3 → 0, 4-6 → 1, 7-9 → 2, 10-12 → 3.
+ */
+export function getRuneSlotsForTier(tier: number | undefined): number {
+  if (!tier) return 0;
+  if (tier >= 10) return 3;
+  if (tier >= 7) return 2;
+  if (tier >= 4) return 1;
+  return 0;
+}

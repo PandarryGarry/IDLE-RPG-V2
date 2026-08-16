@@ -10,8 +10,8 @@ import { usePlayerStore } from '@/store/playerStore';
 import { getItem } from '@/data/items';
 import { useTranslation } from '@/hooks/useTranslation';
 import { getSkillIcon, getItemIcon, UI_ICONS } from '@/lib/icons';
-import { getTierBackground, getTierBorder } from '@/data/tiers';
 import { cn } from '@/lib/utils';
+import { getTierConfig } from '@/data/items/tiers';
 
 export function FiremakingPage() {
   const { t } = useTranslation();
@@ -122,6 +122,7 @@ export function FiremakingPage() {
           const locked = playerLevel < log.levelRequired;
           const logQty = getLogQty(log.logId);
           const hasEnough = logQty >= 1;
+          const tierCfg = getTierConfig(log.charcoalTier);
 
           return (
             <div
@@ -136,13 +137,13 @@ export function FiremakingPage() {
               )}
             >
               <div className="flex items-center gap-2 md:gap-3 mb-1.5 md:mb-2">
-                {/* Иконка с цветом тира + ярлык T */}
+                {/* Иконка с универсальным нейтральным стилем тира + ярлык T */}
                 <div className="relative shrink-0">
                   <div
                     className={cn(
                       'w-10 h-10 md:w-14 md:h-14 rounded-lg md:rounded-xl border flex items-center justify-center text-xl md:text-3xl shadow-inner',
-                      getTierBackground(log.charcoalTier),
-                      getTierBorder(log.charcoalTier),
+                      tierCfg?.badgeBgColor,
+                      tierCfg?.badgeTextColor,
                       locked && 'grayscale opacity-70'
                     )}
                   >

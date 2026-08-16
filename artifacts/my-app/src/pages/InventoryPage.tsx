@@ -1,9 +1,9 @@
 import React from 'react';
 import { useBankStore } from '@/store/bankStore';
-import { ItemIcon } from '@/components/ItemIcon';
+import { ItemCard } from '@/components/ItemCard';
 import { ItemInfoPopover } from '@/components/ItemInfoPopover';
 import { getItem } from '@/data/items';
-import { Search, Coins, Lock } from 'lucide-react';
+import { Search, Coins } from 'lucide-react';
 import { formatNumber } from '@/lib/utils';
 import { usePlayerStore } from '@/store/playerStore';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -33,11 +33,8 @@ export function InventoryPage() {
   const totalItems = items.filter(i => i.quantity > 0).length;
 
   const handleSell = (itemId: string, qty: number) => {
-    // Проверяем, не заблокирован ли предмет
     const slot = useBankStore.getState().getSlot(itemId);
-    if (slot?.locked) {
-      return; // Заблокированные предметы нельзя продавать
-    }
+    if (slot?.locked) return;
     sellItem(itemId, qty);
   };
 
@@ -106,7 +103,7 @@ export function InventoryPage() {
         </div>
       </div>
 
-      {/* Category Filters — touch-friendly */}
+      {/* Category Filters */}
       <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
         {CATEGORIES.map(({ key, label, icon }) => (
           <button
@@ -124,7 +121,7 @@ export function InventoryPage() {
         ))}
       </div>
 
-      {/* Controls — touch-friendly */}
+      {/* Controls */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1 sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
@@ -137,7 +134,6 @@ export function InventoryPage() {
           />
         </div>
 
-        {/* Sort — scrollable on mobile, touch-friendly */}
         <div className="flex gap-1.5 bg-card p-1 rounded-xl border border-border overflow-x-auto shrink-0">
           {SORT_MODES.map(({ key, label }) => (
             <button
@@ -155,7 +151,7 @@ export function InventoryPage() {
         </div>
       </div>
 
-      {/* Grid — touch-friendly items */}
+      {/* Grid */}
       <div className="bg-card border border-border rounded-2xl p-3 md:p-5 shadow-sm min-h-[400px]">
         {filteredItems.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-muted-foreground py-16">
@@ -167,15 +163,12 @@ export function InventoryPage() {
             {filteredItems.map(slot => {
               const item = getItem(slot.itemId);
               if (!item) return null;
-              const displayName = slot.tier ? `${item.name} T${slot.tier}` : item.name;
+              const displayName = item.name;
+              // grade пока undefined — добавим, когда появится в ItemSlot
+              const grade = (slot as any).grade as string | undefined;
+
               return (
-                <div key={`${slot.itemId}-${slot.tier ?? 0}`} className="relative flex flex-col items-center">
-                  {/* Lock indicator on item */}
-                  {slot.locked && (
-                    <div className="absolute top-1 right-1 z-10 w-5 h-5 bg-amber-500/90 rounded-full flex items-center justify-center shadow-md">
-                      <Lock className="w-3 h-3 text-white" />
-                    </div>
-                  )}
+                <div key={`${slot.itemId}-${slot.tier ?? 0}-${grade ?? 'n'}`} className="relative flex flex-col items-center">
                   <ItemInfoPopover
                     itemId={slot.itemId}
                     quantity={slot.quantity}
@@ -218,23 +211,15 @@ export function InventoryPage() {
                       </div>
                     }
                   >
-                    <button
-                      type="button"
-                      aria-label={displayName}
-                      className={`rounded-lg transition-all active:scale-95 hover:shadow-[0_0_12px_rgba(34,197,94,0.15)] min-h-[44px] min-w-[44px] ${
-                        slot.locked ? 'opacity-80' : ''
-                      }`}
-                    >
-                      <ItemIcon
+                    <div>
+                      <ItemCard
                         itemId={slot.itemId}
+                        grade={grade}
                         quantity={slot.quantity}
-                        tier={slot.tier}
-                        showTierBadge={!!slot.tier}
-                        size="lg"
-                        showTooltip={false}
-                        className="aspect-square h-auto w-full cursor-pointer hover:border-primary"
+                        locked={slot.locked}
+                        size="md"
                       />
-                    </button>
+                    </div>
                   </ItemInfoPopover>
                   <span className="text-[10px] text-muted-foreground font-medium truncate w-full text-center px-0.5 block mt-1">
                     {displayName}

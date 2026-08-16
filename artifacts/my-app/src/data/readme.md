@@ -1,4 +1,3 @@
-Принял. Зафиксировал всё, начиная с 5 пунктов и включая обсуждение оружия/экипировки/рун. Это большая работа — даю полный план, чтобы ничего не упустить. Код пока НЕ пишу, жду подтверждения.
 
 ---
 
@@ -71,7 +70,7 @@ data/items/
 
 ---
 
-## ⚙️ Шаг 3 — реорганизация `data/economy/modifiers`
+## ⚙️ Шаг 3 — реорганизация `data/economy/modifiers` ✅
 
 Удалить `modifiers.ts` → создать папку:
 ```
@@ -88,7 +87,7 @@ data/economy/modifiers/
 
 ---
 
-## 🃏 Шаг 4 — компонент `components/ItemCard.tsx` (вариант C)
+## 🃏 Шаг 4 — компонент `components/ItemCard.tsx` (вариант C) ✅
 
 Props: `itemId, size(sm/md/lg), quantity, showCount, tier, grade, locked, onClick`
 - Внутри использует конфиги `items/tiers.ts` / `items/grades.ts` для рамки/фона/бирки
