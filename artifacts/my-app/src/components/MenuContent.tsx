@@ -13,18 +13,18 @@ import { Home, User, Backpack, Coins, Store, Settings, Flame, LogIn, UserCircle 
 const isAuthenticated = false;
 
 // ═══════════════════════════════════════════════════════════════
-// ЛОГОТИП
+// ЛОГОТИП (индиго, как акценты инвентаря)
 // ═══════════════════════════════════════════════════════════════
 
 export function MenuLogo({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <Link href="/" onClick={onNavigate} className="flex items-center gap-2.5 group">
-      <div className="w-9 h-9 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/40 text-primary shadow-[0_0_10px_rgba(34,211,238,0.3)] group-hover:shadow-[0_0_14px_rgba(34,211,238,0.5)] transition-shadow">
+      <div className="w-9 h-9 rounded-lg bg-indigo-500/20 flex items-center justify-center border border-indigo-500/40 text-indigo-400 shadow-[0_0_10px_rgba(99,102,241,0.25)] group-hover:shadow-[0_0_14px_rgba(99,102,241,0.4)] transition-shadow">
         <Flame className="w-5 h-5" />
       </div>
       <div className="flex flex-col leading-tight">
         <span className="font-black text-base tracking-tight text-foreground">
-          Idle<span className="text-primary">RPG</span>
+          Idle<span className="text-indigo-400">RPG</span>
         </span>
         <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest">
           v2.1
@@ -35,7 +35,7 @@ export function MenuLogo({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ЭЛЕМЕНТ НАВИГАЦИИ (адаптивный: крупнее на мобильных)
+// ЭЛЕМЕНТ НАВИГАЦИИ (карточка как в ките: иконка + подпись)
 // ═══════════════════════════════════════════════════════════════
 
 interface NavItemProps {
@@ -54,16 +54,16 @@ function NavItem({ href, icon, label, accentColor, onNavigate }: NavItemProps) {
     <Link href={href} onClick={onNavigate} className="block">
       <div
         className={cn(
-          'flex flex-col items-center gap-1.5 p-3 md:p-2.5 min-h-[70px] md:min-h-0 rounded-xl transition-all border',
+          'flex flex-col items-center gap-1.5 p-3 md:p-2.5 min-h-[70px] md:min-h-0 rounded-xl transition-all',
           isActive
-            ? 'bg-primary/15 border-primary/50 shadow-[0_0_12px_rgba(34,211,238,0.25)]'
-            : 'bg-background/40 border-border hover:border-primary/40 hover:bg-background/80'
+            ? 'bg-white/10 shadow-sm'
+            : 'bg-white/5 hover:bg-white/10 active:scale-95'
         )}
       >
         <div
           className={cn(
             'w-10 h-10 rounded-lg flex items-center justify-center transition-all',
-            isActive ? accentColor : 'bg-muted/60 text-muted-foreground'
+            isActive ? accentColor : 'bg-white/10 text-muted-foreground'
           )}
         >
           {icon}
@@ -71,7 +71,7 @@ function NavItem({ href, icon, label, accentColor, onNavigate }: NavItemProps) {
         <span
           className={cn(
             'text-[10px] font-bold leading-tight text-center truncate w-full',
-            isActive ? 'text-primary' : 'text-muted-foreground'
+            isActive ? 'text-foreground' : 'text-muted-foreground'
           )}
         >
           {label}
@@ -82,13 +82,13 @@ function NavItem({ href, icon, label, accentColor, onNavigate }: NavItemProps) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// CIRCLE ДЛЯ COMBAT (все ведут на /combat, без active-подсветки)
+// CIRCLE ДЛЯ COMBAT (все ведут на /combat)
 // ═══════════════════════════════════════════════════════════════
 
 function CombatCircle({ href, skillId, onNavigate }: { href: string; skillId: SkillId; onNavigate?: () => void }) {
   return (
     <Link href={href} onClick={onNavigate} className="block group min-h-[56px] md:min-h-0">
-      <div className="flex items-center justify-center p-1.5 md:p-1 rounded-xl transition-all hover:bg-primary/10">
+      <div className="flex items-center justify-center p-1.5 md:p-1 rounded-xl transition-all hover:bg-white/10 active:scale-95">
         <SkillCircle skillId={skillId} size="sm" showLevel={true} />
       </div>
     </Link>
@@ -112,10 +112,10 @@ function SkillRow({ href, skillId, onNavigate }: { href: string; skillId: SkillI
     <Link href={href} onClick={onNavigate} className="block">
       <div
         className={cn(
-          'flex items-center gap-2.5 md:gap-2 px-2 md:px-1.5 py-2 md:py-1.5 min-h-[44px] md:min-h-0 rounded-xl transition-all border',
+          'flex items-center gap-2.5 md:gap-2 px-2 md:px-1.5 py-2 md:py-1.5 min-h-[44px] md:min-h-0 rounded-xl transition-all',
           isActive
-            ? 'bg-primary/10 border-primary/40'
-            : 'border-transparent hover:bg-background/60 hover:border-border'
+            ? 'bg-white/10'
+            : 'hover:bg-white/5 active:scale-[0.98]'
         )}
       >
         <SkillCircle skillId={skillId} size="sm" showLevel={false} />
@@ -123,7 +123,7 @@ function SkillRow({ href, skillId, onNavigate }: { href: string; skillId: SkillI
         <span
           className={cn(
             'flex-1 text-sm md:text-[12px] font-semibold truncate',
-            isActive ? 'text-primary' : 'text-foreground/90'
+            isActive ? 'text-indigo-300' : 'text-foreground/90'
           )}
         >
           {label}
@@ -131,14 +131,14 @@ function SkillRow({ href, skillId, onNavigate }: { href: string; skillId: SkillI
 
         <div className="flex items-center gap-1.5 flex-shrink-0">
           {isTraining && (
-            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_4px_rgba(34,211,238,1)]" />
+            <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shadow-[0_0_4px_rgba(129,140,248,1)]" />
           )}
           <span
             className={cn(
-              'font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-md border',
+              'font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-md',
               isActive
-                ? 'bg-primary text-primary-foreground border-primary'
-                : 'bg-background/80 text-foreground border-border'
+                ? 'bg-indigo-500 text-white'
+                : 'bg-white/5 text-foreground'
             )}
           >
             {level}
@@ -160,7 +160,7 @@ function SectionTitle({ icon, title }: { icon: string; title: string }) {
       <h3 className="text-[10px] font-black text-muted-foreground/80 uppercase tracking-wider">
         {title}
       </h3>
-      <div className="flex-1 h-px bg-border/60 ml-1" />
+      <div className="flex-1 h-px bg-white/10 ml-1" />
     </div>
   );
 }
@@ -240,9 +240,9 @@ export function PlayerCard({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <Link href="/character" onClick={onNavigate} className="block group">
-      <div className="flex items-center gap-2 p-2 rounded-xl bg-background/60 border border-border hover:border-primary/40 transition-all">
-        <div className="w-9 h-9 shrink-0 rounded-full bg-muted/60 flex items-center justify-center border border-border group-hover:border-primary/40 transition-colors">
-          <UserCircle className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+      <div className="flex items-center gap-2 p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all">
+        <div className="w-9 h-9 shrink-0 rounded-full bg-white/10 flex items-center justify-center">
+          <UserCircle className="w-5 h-5 text-muted-foreground group-hover:text-indigo-300 transition-colors" />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[11px] font-bold text-foreground truncate leading-tight">
@@ -255,7 +255,7 @@ export function PlayerCard({ onNavigate }: { onNavigate?: () => void }) {
             </p>
           )}
         </div>
-        <div className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-md bg-primary/15 text-primary text-[10px] font-bold group-hover:bg-primary/25 transition-colors">
+        <div className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-md bg-indigo-500/15 text-indigo-300 text-[10px] font-bold group-hover:bg-indigo-500/25 transition-colors">
           <LogIn className="w-3 h-3" />
           {t('auth.login')}
         </div>

@@ -93,6 +93,7 @@ export const UI_ICONS = {
 
   // Фильтры
   all: '📋',
+  allItems: '🪎',
   equipment: '⚔️',
   resources: '🌲',
   food: '🍖',
@@ -119,7 +120,18 @@ export const UI_ICONS = {
   gem: '💎',
   timer: '⏱',
   perAction: '⛏️',
+
+  // ── НОВОЕ: навыки для заглушек ──
+  combat: '⚔️',
+  woodcutting: '🪓',
+  mining: '⛏️',
+  fishing: '🎣',
+  cooking: '🍳',
+  smithing: '🔨',
+  firemaking: '🔥',
 } as const;
+
+
 
 // ═══════════════════════════════════════════════════════════════
 // ПРЕДМЕТЫ (Items)

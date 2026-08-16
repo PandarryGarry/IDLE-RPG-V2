@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { SkillId, SkillState, Equipment, EquipSlot } from '../data/types';
 import { getLevelForXp, getXpForLevel, XP_TABLE, MAX_LEVEL } from '../gameEngine/xpTable';
 import { calcCombatLevel } from '../gameEngine/formulas';
-import { useBankStore } from './bankStore';
+import { useInventoryStore } from './inventoryStore';
 
 const ALL_SKILL_IDS: SkillId[] = [
   'attack', 'strength', 'defence', 'hitpoints',
@@ -112,15 +112,15 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   },
 
   equipItem: (itemId, slot) => {
-    const bankStore = useBankStore.getState();
+    const inventoryStore = useInventoryStore.getState();
     const { equipment } = get();
     const previous = equipment[slot];
 
-    // If there's already something equipped in this slot, we need to put it back in the bank
-    // first — but only proceed if there's space (or the bank already has the item).
+    // If there's already something equipped in this slot, we need to put it back in the inventory
+    // first — but only proceed if there's space (or the inventory already has the item).
     if (previous !== null) {
-      const hasStack = bankStore.getItemQty(previous) > 0;
-      const hasSlot = bankStore.items.filter(s => s.quantity > 0).length < bankStore.maxSlots;
+      const hasStack = inventoryStore.getItemQty(previous) > 0;
+      const hasSlot = inventoryStore.items.filter(s => s.quantity > 0).length < inventoryStore.maxSlots;
       if (!hasStack && !hasSlot) {
         // No space to return the displaced item — abort silently
         return previous;
@@ -132,15 +132,15 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   },
 
   unequipItem: (slot) => {
-    const bankStore = useBankStore.getState();
+    const inventoryStore = useInventoryStore.getState();
     const { equipment } = get();
     const previous = equipment[slot];
     if (!previous) return null;
 
-    // Attempt to add item to bank BEFORE removing from equipment
-    const added = bankStore.addItem(previous, 1);
+    // Attempt to add item to inventory BEFORE removing from equipment
+    const added = inventoryStore.addItem(previous, 1);
     if (!added) {
-      // Bank is full — do not unequip; item would be lost
+      // Inventory is full — do not unequip; item would be lost
       return null;
     }
 

@@ -2,9 +2,10 @@ import React from 'react';
 import { getItem } from '@/data/items';
 import { formatNumber } from '@/lib/utils';
 import { useTranslation } from '@/hooks/useTranslation';
-import { ItemIcon } from '@/components/ItemIcon';
-import { useBankStore } from '@/store/bankStore';
+import { ItemCard } from '@/components/ItemCard';
+import { useInventoryStore } from '@/store/inventoryStore';
 import { usePlayerStore } from '@/store/playerStore';
+import { getEffectiveEquipmentStats } from '@/data/economy';
 import { Lock, Unlock } from 'lucide-react';
 import {
   Popover,
@@ -15,56 +16,60 @@ import {
 interface ItemInfoPopoverProps {
   itemId: string;
   quantity?: number;
+  /** Грейд экземпляра (если есть) — для корректных статов */
+  grade?: string;
   children?: React.ReactNode;
   actions?: React.ReactNode;
 }
 
 const STAT_LABELS: Record<string, string> = {
-  attackBonus: 'Attack',
-  strengthBonus: 'Strength',
-  defenceBonus: 'Defence',
-  rangedAttackBonus: 'Ranged attack',
-  rangedStrengthBonus: 'Ranged strength',
-  magicAttackBonus: 'Magic attack',
-  magicDamageBonus: 'Magic damage',
-  prayerBonus: 'Prayer',
+  attackBonus: 'Атака',
+  strengthBonus: 'Сила',
+  defenceBonus: 'Защита',
+  rangedAttackBonus: 'Дальняя атака',
+  rangedStrengthBonus: 'Дальняя сила',
+  magicAttackBonus: 'Маг. атака',
+  magicDamageBonus: 'Маг. урон',
+  prayerBonus: 'Молитва',
+  attackSpeed: 'Скор. атаки',
+  agility: 'Ловкость',
 };
 
 export function ItemInfoPopover({
   itemId,
   quantity,
+  grade,
   children,
   actions,
 }: ItemInfoPopoverProps) {
   const { t } = useTranslation();
   const item = getItem(itemId);
 
-  // Получаем состояние lock из bankStore
-  const slot = useBankStore(s => s.getSlot(itemId));
-  const lockItem = useBankStore(s => s.lockItem);
+  const slot = useInventoryStore(s => s.getSlot(itemId, undefined, grade as any));
+  const lockItem = useInventoryStore(s => s.lockItem);
   const isLocked = slot?.locked ?? false;
 
-  // Получаем текущую экипировку для сравнения
   const equipment = usePlayerStore(s => s.equipment);
 
   if (!item) return children ?? null;
 
-  const combatStats = Object.entries(item.combatStats ?? {})
-    .filter(([, value]) => value !== undefined && value !== 0);
+  // ── Статы: читаем из baseStats с учётом грейда ──
+  const effectiveStats = item.equipSlot || item.category === 'weapon'
+    ? getEffectiveEquipmentStats({ ...item, grade: grade as any } as any)
+    : null;
 
-  // Сравнение с текущей экипировкой
-  const comparison = getEquipmentComparison(item, equipment, usePlayerStore.getState);
+  const stats = effectiveStats
+    ? Object.entries(effectiveStats).filter(([, v]) => v !== undefined && v !== 0)
+    : [];
+
+  const comparison = getEquipmentComparison(item, grade, equipment);
 
   return (
     <Popover>
       <PopoverTrigger asChild>
         {children ?? (
-          <button
-            type="button"
-            aria-label={item.name}
-            className="rounded-lg transition-transform active:scale-95"
-          >
-            <ItemIcon itemId={itemId} quantity={quantity} size="md" showTooltip={false} />
+          <button type="button" aria-label={item.name} className="rounded-lg active:scale-95 transition-transform">
+            <ItemCard itemId={itemId} quantity={quantity} grade={grade} size="md" />
           </button>
         )}
       </PopoverTrigger>
@@ -74,17 +79,20 @@ export function ItemInfoPopover({
         className="w-72 max-w-[calc(100vw-1.5rem)] border-white/10 bg-popover/95 p-3 shadow-2xl backdrop-blur-xl"
       >
         <div className="flex items-start gap-2.5">
-          <ItemIcon itemId={itemId} size="md" showTooltip={false} />
+          <ItemCard itemId={itemId} grade={grade} size="md" />
           <div className="min-w-0 flex-1">
             <h3 className="truncate text-sm font-black text-foreground">{item.name}</h3>
             <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
               {t('inventory.type')}: {item.category.replace('_', ' ')}
             </p>
+            {item.tier && (
+              <p className="text-[10px] font-mono text-zinc-300 mt-0.5">Tier {item.tier}</p>
+            )}
+            {grade && (
+              <p className="text-[10px] font-mono text-foreground mt-0.5 capitalize">{grade}</p>
+            )}
           </div>
-          {/* Lock indicator */}
-          {isLocked && (
-            <Lock className="w-4 h-4 text-amber-400 shrink-0" />
-          )}
+          {isLocked && <Lock className="w-4 h-4 text-amber-400 shrink-0" />}
         </div>
 
         <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
@@ -99,9 +107,7 @@ export function ItemInfoPopover({
           {item.healAmount !== undefined && (
             <>
               <dt className="text-muted-foreground">{t('inventory.heals')}</dt>
-              <dd className="text-right font-mono font-bold text-emerald-400">
-                +{item.healAmount} HP
-              </dd>
+              <dd className="text-right font-mono font-bold text-emerald-400">+{item.healAmount} HP</dd>
             </>
           )}
           {item.equipSlot && (
@@ -112,13 +118,13 @@ export function ItemInfoPopover({
           )}
         </dl>
 
-        {combatStats.length > 0 && (
+        {stats.length > 0 && (
           <div className="mt-3 border-t border-border/60 pt-2">
             <div className="mb-1 text-[10px] font-black uppercase tracking-wider text-muted-foreground">
               {t('inventory.stats')}
             </div>
             <div className="space-y-1 text-xs">
-              {combatStats.map(([stat, value]) => (
+              {stats.map(([stat, value]) => (
                 <div key={stat} className="flex justify-between gap-3">
                   <span className="text-muted-foreground">{STAT_LABELS[stat] ?? stat}</span>
                   <span className={Number(value) > 0 ? 'font-mono text-primary' : 'font-mono text-destructive'}>
@@ -130,7 +136,6 @@ export function ItemInfoPopover({
           </div>
         )}
 
-        {/* Сравнение с текущей экипировкой */}
         {comparison && (
           <div className="mt-3 border-t border-border/60 pt-2">
             <div className="mb-1 text-[10px] font-black uppercase tracking-wider text-muted-foreground">
@@ -149,10 +154,9 @@ export function ItemInfoPopover({
           </div>
         )}
 
-        {/* Lock button */}
         <button
           type="button"
-          onClick={() => lockItem(itemId, !isLocked)}
+          onClick={() => lockItem(itemId, slot?.tier, grade as any, !isLocked)}
           className={`mt-3 w-full flex items-center justify-center gap-2 px-3 py-2.5 min-h-[44px] rounded-lg text-xs font-bold transition-colors active:scale-95 ${
             isLocked
               ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25'
@@ -160,7 +164,7 @@ export function ItemInfoPopover({
           }`}
         >
           {isLocked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
-          {isLocked ? t('inventory.unlock') ?? 'Unlock' : t('inventory.lock') ?? 'Lock'}
+          {isLocked ? (t('inventory.unlock') ?? 'Unlock') : (t('inventory.lock') ?? 'Lock')}
         </button>
 
         {actions && <div className="mt-2 border-t border-border/60 pt-2">{actions}</div>}
@@ -170,35 +174,34 @@ export function ItemInfoPopover({
 }
 
 /**
- * Сравнивает статы предмета с текущей экипировкой.
- * Возвращает массив [stat, difference] или null если сравнение не применимо.
+ * Сравнение статов предмета с текущей экипировкой.
+ * Учитывает грейд обоих предметов через getEffectiveEquipmentStats.
  */
 function getEquipmentComparison(
-  item: ReturnType<typeof getItem>,
+  item: NonNullable<ReturnType<typeof getItem>>,
+  grade: string | undefined,
   equipment: Record<string, string | null>,
-  getPlayerState: () => any
 ): [string, number][] | null {
-  if (!item?.equipSlot || !item.combatStats) return null;
+  if (!item.equipSlot || item.category !== 'weapon' && !item.equipSlot) return null;
+  if (!item.baseStats) return null;
 
-  const currentItem = equipment[item.equipSlot];
-  if (!currentItem) return null; // Ничего не экипировано в этом слоте
+  const currentItemId = equipment[item.equipSlot];
+  if (!currentItemId) return null;
 
-  const currentData = getItem(currentItem);
-  if (!currentData?.combatStats) return null;
+  const currentItem = getItem(currentItemId);
+  if (!currentItem?.baseStats) return null;
+
+  const newStats = getEffectiveEquipmentStats({ ...item, grade: grade as any } as any);
+  const oldStats = getEffectiveEquipmentStats(currentItem);
 
   const comparison: [string, number][] = [];
-  const allStats = new Set([
-    ...Object.keys(item.combatStats),
-    ...Object.keys(currentData.combatStats),
-  ]);
+  const allStats = new Set([...Object.keys(newStats), ...Object.keys(oldStats)]);
 
   for (const stat of allStats) {
-    const newValue = (item.combatStats as Record<string, number>)[stat] ?? 0;
-    const oldValue = (currentData.combatStats as Record<string, number>)[stat] ?? 0;
-    const diff = newValue - oldValue;
-    if (diff !== 0) {
-      comparison.push([stat, diff]);
-    }
+    const newVal = (newStats as any)[stat] ?? 0;
+    const oldVal = (oldStats as any)[stat] ?? 0;
+    const diff = newVal - oldVal;
+    if (diff !== 0) comparison.push([stat, diff]);
   }
 
   return comparison.length > 0 ? comparison : null;

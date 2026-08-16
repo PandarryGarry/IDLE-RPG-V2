@@ -1,137 +1,152 @@
 // ═══════════════════════════════════════════════════════════════
-// УНИВЕРСАЛЬНАЯ КАРТОЧКА ПРЕДМЕТА («оболочка»)
-// Сама читает: иконку, тир (бирку), грейд (цвет), статы, слоты рун.
-// + hover-свечение, legendary-glow, tooltip (ItemInfoPopover).
+// ITEM CARD v4 — точно по Modular Game UI Kit
+// Ячейка = слой светлее страницы, крупная иконка, мягкие бейджи,
+// количество приглушённое. Без внешних панелей.
 // ═══════════════════════════════════════════════════════════════
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { getItem } from '@/data/items';
-import { getGradeConfig } from '@/data/items/grades';
-import { getTierConfig, getRuneSlotsForTier } from '@/data/items/tiers';
-import { getEffectiveEquipmentStats } from '@/data/economy';
-import { ItemInfoPopover } from '@/components/ItemInfoPopover';
+import { DEFAULT_GRADES } from '@/data/items/grades';
 import { UI_ICONS } from '@/lib/icons';
 
 interface ItemCardProps {
   itemId: string;
   grade?: string;
+  tier?: number;
   quantity?: number;
   showCount?: boolean;
   locked?: boolean;
-  size?: 'sm' | 'md' | 'lg';
-  /** Клик открывает ItemInfoPopover (инфо о предмете) */
-  tooltip?: boolean;
+  index?: number;
+  size?: 'cell' | 'sm' | 'md' | 'lg';
   onClick?: () => void;
+  onLongPress?: () => void;
   className?: string;
 }
 
-const SIZE_BOX = {
-  sm: 'w-10 h-10 text-xl rounded-lg',
-  md: 'w-14 h-14 text-2xl rounded-xl',
-  lg: 'w-16 h-16 text-3xl rounded-xl',
+const SIZE_CLASS = {
+  cell: 'w-full aspect-square',
+  sm: 'w-10 h-10',
+  md: 'w-14 h-14',
+  lg: 'w-20 h-20',
+};
+
+const ICON_SIZE = {
+  cell: 'text-3xl sm:text-4xl',
+  sm: 'text-xl',
+  md: 'text-2xl',
+  lg: 'text-4xl',
+};
+
+const GRADE_DOT: Record<string, string> = {
+  common: 'bg-zinc-400',
+  uncommon: 'bg-emerald-400',
+  rare: 'bg-sky-400',
+  epic: 'bg-purple-400',
+  legendary: 'bg-amber-400',
+};
+
+const GRADE_GLOW: Record<string, string> = {
+  epic: 'shadow-[0_0_14px_rgba(168,85,247,0.22)]',
+  legendary: 'shadow-[0_0_16px_rgba(251,191,36,0.28)]',
 };
 
 export function ItemCard({
-  itemId, grade, quantity, showCount = true, locked = false,
-  size = 'md', tooltip = false, onClick, className,
+  itemId, grade, tier, quantity, showCount = true, locked = false,
+  index, size = 'cell', onClick, onLongPress, className,
 }: ItemCardProps) {
+  const pressTimer = useRef<number | null>(null);
+
   const item = getItem(itemId);
   if (!item) return null;
 
-  const gradeCfg = getGradeConfig(grade as any);
-  const tierCfg = getTierConfig(item.tier);
-  const isEquippable = !!item.equipSlot || item.category === 'weapon';
-  const runeSlots = isEquippable ? getRuneSlotsForTier(item.tier) : 0;
-  const stats = isEquippable ? getEffectiveEquipmentStats(item) : null;
+  const effectiveGrade = grade ?? item.grade ?? DEFAULT_GRADES[itemId];
+  const tierValue = tier ?? item.tier;
   const showQty = showCount && item.stackable && (quantity ?? 0) > 1;
-  const isLegendary = grade === 'legendary';
 
-  // CSS-переменная для свечения (hover + legendary)
-  const glowStyle = gradeCfg
-    ? ({ ['--glow' as any]: gradeCfg.glowColor } as React.CSSProperties)
+  const startPress = () => {
+    if (!onLongPress) return;
+    pressTimer.current = window.setTimeout(() => {
+      onLongPress();
+      if (navigator.vibrate) navigator.vibrate(25);
+    }, 450);
+  };
+  const cancelPress = () => {
+    if (pressTimer.current) window.clearTimeout(pressTimer.current);
+    pressTimer.current = null;
+  };
+
+  const delayStyle = index !== undefined
+    ? { animationDelay: `${Math.min(index * 25, 300)}ms` }
     : undefined;
 
-  const glowClass = cn(
-    !locked && 'transition-shadow hover:shadow-[0_0_14px_var(--glow)]',
-    isLegendary && !locked && 'shadow-[0_0_18px_var(--glow)]'
-  );
-
-  const iconBox = (
+  return (
     <div
+      style={delayStyle}
+      onClick={onClick}
+      onTouchStart={startPress}
+      onTouchEnd={cancelPress}
+      onTouchMove={cancelPress}
+      onContextMenu={(e) => { if (onLongPress) { e.preventDefault(); onLongPress(); } }}
       className={cn(
-        'relative shrink-0 flex items-center justify-center border shadow-inner',
-        SIZE_BOX[size],
-        gradeCfg ? `${gradeCfg.bgColor} ${gradeCfg.borderColor}` : 'bg-background/40 border-border',
-        locked && 'grayscale opacity-60'
+        'card-in relative rounded-xl bg-white/[0.06] flex items-center justify-center',
+        'transition-all duration-100 active:scale-95',
+        onClick && 'cursor-pointer hover:bg-white/10',
+        GRADE_GLOW[effectiveGrade ?? ''] ?? '',
+        SIZE_CLASS[size],
+        className
       )}
     >
-      {item.icon}
-      {tierCfg && (
-        <span className={cn(
-          'absolute -top-1.5 -right-1.5 px-1 py-0.5 rounded text-[9px] font-mono font-black leading-none',
-          tierCfg.badgeBgColor, tierCfg.badgeTextColor
-        )}>T{item.tier}</span>
+      {/* Крупная иконка (как в ките — ~60% ячейки) */}
+      <span className={cn('select-none leading-none', ICON_SIZE[size], locked && 'grayscale opacity-60')}>
+        {item.icon}
+      </span>
+
+      {/* Грейд-точка */}
+      {effectiveGrade && effectiveGrade !== 'common' && (
+        <span
+          className={cn(
+            'absolute top-1.5 right-1.5 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full',
+            GRADE_DOT[effectiveGrade]
+          )}
+        />
       )}
+
+      {/* Тир-бейдж — мягкий, не кричащий */}
+      {tierValue && (
+        <span className="absolute top-1 left-1 px-1 py-px rounded-md text-[8px] sm:text-[9px] font-mono font-bold leading-tight bg-white/10 text-zinc-300">
+          T{tierValue}
+        </span>
+      )}
+
+      {/* Количество — мелкое, приглушённое */}
       {showQty && (
-        <span className="absolute -bottom-1 -right-1 px-1 rounded bg-black/70 text-[9px] font-mono font-bold text-white leading-tight">×{quantity}</span>
+        <span className="absolute bottom-1 right-1.5 text-[10px] font-medium text-zinc-400 tabular-nums">
+          {quantity}
+        </span>
       )}
+
+      {/* Замок */}
       {locked && (
-        <span className="absolute inset-0 flex items-center justify-center text-sm opacity-80">{UI_ICONS.locked}</span>
+        <span className="absolute bottom-1 left-1.5 text-[10px] opacity-70">
+          {UI_ICONS.locked}
+        </span>
       )}
     </div>
   );
+}
 
-  // ── Компактные размеры ──
-  if (size !== 'lg') {
-    const body = (
-      <div onClick={onClick} style={glowStyle}
-        className={cn('relative rounded-xl', glowClass, onClick && 'cursor-pointer', className)}>
-        {iconBox}
-        {isLegendary && <div className="absolute inset-0 rounded-xl pointer-events-none shadow-[0_0_18px_var(--glow)] animate-pulse" />}
-      </div>
-    );
-    return tooltip ? <ItemInfoPopover itemId={itemId}>{body}</ItemInfoPopover> : body;
-  }
-
-  // ── lg: полная карточка ──
-  const body = (
-    <div onClick={onClick} style={glowStyle}
+// ── Пустой слот «+» — тот же фон, что у ячеек (как в ките) ──
+export function EmptySlot({ className }: { className?: string }) {
+  return (
+    <div
       className={cn(
-        'relative flex flex-col gap-2 p-3 rounded-xl border',
-        gradeCfg ? `${gradeCfg.bgColor} ${gradeCfg.borderColor}` : 'bg-card border-border',
-        glowClass, onClick && 'cursor-pointer', className
-      )}>
-      {isLegendary && <div className="absolute inset-0 rounded-xl pointer-events-none shadow-[0_0_18px_var(--glow)] animate-pulse" />}
-      <div className="flex items-center gap-3">
-        {iconBox}
-        <div className="flex-1 min-w-0">
-          <p className={cn('font-bold text-sm leading-tight truncate', gradeCfg?.textColor)}>{item.name}</p>
-          {item.description && <p className="text-[10px] text-muted-foreground line-clamp-1">{item.description}</p>}
-        </div>
-      </div>
-      {stats && Object.keys(stats).length > 0 && (
-        <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[11px] font-mono">
-          {stats.attackBonus != null && <span className="text-muted-foreground">Атака <b className="text-foreground">+{stats.attackBonus}</b></span>}
-          {stats.strengthBonus != null && <span className="text-muted-foreground">Сила <b className="text-foreground">+{stats.strengthBonus}</b></span>}
-          {stats.defenceBonus != null && <span className="text-muted-foreground">Защита <b className="text-foreground">+{stats.defenceBonus}</b></span>}
-          {stats.attackSpeed != null && <span className="text-muted-foreground">Скор. <b className="text-foreground">{stats.attackSpeed}</b></span>}
-        </div>
+        'w-full aspect-square rounded-xl bg-white/[0.06]',
+        'flex items-center justify-center',
+        className
       )}
-      {runeSlots > 0 && (
-        <div className="flex gap-1.5">
-          {Array.from({ length: runeSlots }).map((_, i) => {
-            const filled = (item.appliedRunes ?? [])[i];
-            return (
-              <div key={i} className={cn(
-                'w-5 h-5 rounded-md border flex items-center justify-center text-[10px]',
-                filled ? 'bg-primary/20 border-primary' : 'bg-background/40 border-border/60 border-dashed'
-              )}>{filled ? '◆' : ''}</div>
-            );
-          })}
-        </div>
-      )}
+    >
+      <span className="text-xl text-zinc-500 select-none">+</span>
     </div>
   );
-  return tooltip ? <ItemInfoPopover itemId={itemId}>{body}</ItemInfoPopover> : body;
 }

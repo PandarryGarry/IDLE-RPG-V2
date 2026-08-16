@@ -7,7 +7,7 @@ import { COOKING_RECIPES_MAP } from '../data/cooking';
 import { SMITHING_MAP } from '../data/smithing';
 import { FIREMAKING_MAP, getBatchTime } from '../data/firemaking';
 import { usePlayerStore } from './playerStore';
-import { useBankStore } from './bankStore';
+import { useInventoryStore } from './inventoryStore';
 import { useNotificationsStore } from './notificationsStore';
 import { useResourceStore } from './resourceStore';
 import { calcBurnChance, calcXpPerHour } from '../gameEngine/formulas';
@@ -96,11 +96,11 @@ function processFishing(actionId: string): ActionResult | null {
 function processCooking(actionId: string): ActionResult | null {
   const recipe = COOKING_RECIPES_MAP[actionId];
   if (!recipe) return null;
-  const bankStore = useBankStore.getState();
-  if (!bankStore.hasItem(recipe.rawItemId, 1)) return null;
+  const inventoryStore = useInventoryStore.getState();
+  if (!inventoryStore.hasItem(recipe.rawItemId, 1)) return null;
   const playerLevel = usePlayerStore.getState().getSkillLevel('cooking');
   if (playerLevel < recipe.levelRequired) return null;
-  bankStore.removeItem(recipe.rawItemId, 1);
+  inventoryStore.removeItem(recipe.rawItemId, 1);
   const burnChance = calcBurnChance(playerLevel, recipe.levelRequired, recipe.burnChanceBase ?? 0.3);
   const burnt = chance(burnChance);
   const outputId = burnt ? (recipe.burntItemId ?? 'burnt_fish') : recipe.cookedItemId;
@@ -110,14 +110,14 @@ function processCooking(actionId: string): ActionResult | null {
 function processSmithing(actionId: string): ActionResult | null {
   const recipe = SMITHING_MAP[actionId];
   if (!recipe) return null;
-  const bankStore = useBankStore.getState();
+  const inventoryStore = useInventoryStore.getState();
   const playerLevel = usePlayerStore.getState().getSkillLevel('smithing');
   if (playerLevel < recipe.levelRequired) return null;
   for (const ing of recipe.ingredients) {
-    if (!bankStore.hasItem(ing.itemId, ing.quantity)) return null;
+    if (!inventoryStore.hasItem(ing.itemId, ing.quantity)) return null;
   }
   for (const ing of recipe.ingredients) {
-    bankStore.removeItem(ing.itemId, ing.quantity);
+    inventoryStore.removeItem(ing.itemId, ing.quantity);
   }
   return { items: [{ itemId: recipe.outputItemId, quantity: recipe.outputQuantity ?? 1 }], xpGained: recipe.xp, masteryXpGained: recipe.masteryXp ?? 3 };
 }
@@ -125,11 +125,11 @@ function processSmithing(actionId: string): ActionResult | null {
 function processFiremaking(actionId: string): ActionResult | null {
   const log = FIREMAKING_MAP[actionId];
   if (!log) return null;
-  const bankStore = useBankStore.getState();
+  const inventoryStore = useInventoryStore.getState();
   const playerLevel = usePlayerStore.getState().getSkillLevel('firemaking');
   if (playerLevel < log.levelRequired) return null;
-  if (!bankStore.hasItem(log.logId, 1)) return null;
-  bankStore.removeItem(log.logId, 1);
+  if (!inventoryStore.hasItem(log.logId, 1)) return null;
+  inventoryStore.removeItem(log.logId, 1);
 
   const successChance = log.successChance ?? 0.75;
   const success = chance(successChance);
@@ -324,12 +324,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     }
 
-    const bankStore = useBankStore.getState();
+    const inventoryStore = useInventoryStore.getState();
     const notifs = useNotificationsStore.getState();
     let inventoryFull = false;
 
     for (const { itemId, quantity, tier } of result.items) {
-      const added = bankStore.addItem(itemId, quantity, tier);
+      const added = inventoryStore.addItem(itemId, quantity, tier);
       if (added && quantity > 0) {
         const item = getItem(itemId);
         if (item) notifs.notifyItem(item.name, quantity, item.icon);

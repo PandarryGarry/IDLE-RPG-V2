@@ -53,6 +53,44 @@ export function getGradeConfig(grade: GradeId | undefined): GradeConfig | null {
   return GRADES[grade] ?? null;
 }
 
+// ═══════════════════════════════════════════════════════════════
+// ВРЕМЕННО: дефолтные грейды ресурсов для визуальной навигации.
+// Когда введём систему ролла грейдов — эта карта удаляется
+// (грейд будет приходить из слота/экземпляра).
+// ═══════════════════════════════════════════════════════════════
+
+export const DEFAULT_GRADES: Record<string, GradeId> = {
+  // ── Брёвна ──
+  normal_logs: 'common', oak_logs: 'common', willow_logs: 'uncommon', teak_logs: 'uncommon',
+  maple_logs: 'rare', mahogany_logs: 'rare', magic_logs: 'epic', redwood_logs: 'legendary',
+  // ── Руда ──
+  copper_ore: 'common', tin_ore: 'common', iron_ore: 'uncommon', coal_ore: 'uncommon',
+  gold_ore: 'rare', mithril_ore: 'rare', adamantite_ore: 'epic', runite_ore: 'epic', dragonite_ore: 'legendary',
+  // ── Слитки ──
+  bronze_bar: 'common', iron_bar: 'uncommon', steel_bar: 'uncommon', gold_bar: 'rare',
+  mithril_bar: 'rare', adamantite_bar: 'epic', runite_bar: 'epic', dragon_bar: 'legendary',
+  // ── Сырая рыба ──
+  raw_shrimp: 'common', raw_sardine: 'common', raw_herring: 'uncommon', raw_mackerel: 'uncommon',
+  raw_trout: 'rare', raw_salmon: 'rare', raw_lobster: 'epic', raw_swordfish: 'epic',
+  raw_crab: 'epic', raw_shark: 'epic', raw_manta_ray: 'legendary', raw_whale: 'legendary',
+  // ── Приготовленная рыба ──
+  shrimp: 'common', sardine: 'common', herring: 'uncommon', mackerel: 'uncommon',
+  trout: 'rare', salmon: 'rare', lobster: 'epic', swordfish: 'epic',
+  cooked_crab: 'epic', shark: 'epic', manta_ray: 'legendary', whale: 'legendary', burnt_fish: 'common',
+  // ── Кости / зола / уголь ──
+  bones: 'common', big_bones: 'uncommon', dragon_bones: 'legendary',
+  ash: 'common', charcoal: 'uncommon',
+  // ── Самоцветы ──
+  topaz: 'uncommon', sapphire: 'rare', emerald: 'rare', ruby: 'epic', diamond: 'epic', onyx: 'legendary',
+  // ── Травы ──
+  guam: 'common', marrentill: 'common', tarromin: 'uncommon', harralander: 'uncommon',
+  ranarr: 'rare', toadflax: 'rare', irit: 'rare', avantoe: 'epic', kwuarm: 'epic',
+  snapdragon: 'epic', cadantine: 'epic', torstol: 'legendary',
+  // ── Руны ──
+  air_rune: 'common', water_rune: 'common', earth_rune: 'common', fire_rune: 'uncommon',
+  mind_rune: 'uncommon', body_rune: 'uncommon', chaos_rune: 'rare', death_rune: 'rare',
+  blood_rune: 'epic', ancient_rune: 'legendary',
+};
 
 /**
  * Слоты рун по тиру (только для экипировки/оружия).

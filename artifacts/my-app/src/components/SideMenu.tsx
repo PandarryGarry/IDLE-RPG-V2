@@ -30,16 +30,16 @@ export function SideMenu() {
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="fixed left-0 top-0 bottom-0 z-50 w-[300px] max-w-[85vw] bg-sidebar border-r border-border flex flex-col md:hidden"
+            className="fixed left-0 top-0 bottom-0 z-50 w-[300px] max-w-[85vw] bg-card border-r border-white/5 flex flex-col md:hidden"
           >
             {/* ── ЛОГОТИП + ЗАКРЫТЬ ── */}
-            <div className="flex items-center justify-between p-4 border-b border-border bg-sidebar-accent/30 backdrop-blur-sm z-10">
+            <div className="flex items-center justify-between p-4 border-b border-white/5 bg-white/[0.03] backdrop-blur-sm z-10">
               <MenuLogo onNavigate={closeSideMenu} />
               <button
                 onClick={closeSideMenu}
-                className="w-10 h-10 flex items-center justify-center rounded-lg bg-background/50 border border-border hover:bg-background transition-colors"
+                className="w-9 h-9 flex items-center justify-center rounded-lg bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
@@ -49,7 +49,7 @@ export function SideMenu() {
             </div>
 
             {/* ── ПОДВАЛ ── */}
-            <div className="p-3 border-t border-border bg-sidebar-accent/30">
+            <div className="p-3 border-t border-white/5 bg-white/[0.03]">
               <PlayerCard onNavigate={closeSideMenu} />
             </div>
           </motion.div>

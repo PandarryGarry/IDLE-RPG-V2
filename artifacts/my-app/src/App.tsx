@@ -13,17 +13,11 @@ import { NotificationToast } from '@/components/NotificationToast';
 import { useUIStore } from '@/store/uiStore';
 import { UI_ICONS } from '@/lib/icons';
 
+// ── Активные страницы (пилот: инвентарь) ──
 import { DashboardPage } from '@/pages/DashboardPage';
-import { WoodcuttingPage } from '@/pages/WoodcuttingPage';
-import { MiningPage } from '@/pages/MiningPage';
-import { FishingPage } from '@/pages/FishingPage';
-import { CookingPage } from '@/pages/CookingPage';
-import { SmithingPage } from '@/pages/SmithingPage';
-import { FiremakingPage } from '@/pages/FiremakingPage';
-import { CombatPage } from '@/pages/CombatPage';
 import { InventoryPage } from '@/pages/InventoryPage';
-import { BankPage } from '@/pages/BankPage';
 import { SettingsPage } from '@/pages/SettingsPage';
+import { StubPage } from '@/pages/StubPage';
 
 function NotFound() {
   return (
@@ -31,17 +25,6 @@ function NotFound() {
       <div className="text-center space-y-3">
         <h1 className="text-5xl font-black text-destructive">404</h1>
         <p className="text-muted-foreground font-mono text-sm">Area not found</p>
-      </div>
-    </div>
-  );
-}
-
-function ShopStub() {
-  return (
-    <div className="min-h-[40vh] flex items-center justify-center">
-      <div className="text-center space-y-3">
-        <div className="text-5xl">{UI_ICONS.shop}</div>
-        <p className="text-muted-foreground font-mono text-sm">Shop coming soon</p>
       </div>
     </div>
   );
@@ -87,18 +70,40 @@ function Router() {
 
         <div className="w-full max-w-[1440px] mx-auto px-3 py-4 pb-20 sm:px-4 md:pb-28 md:px-6 lg:px-8">
           <Switch>
+            {/* Активные страницы */}
             <Route path="/" component={DashboardPage} />
-            <Route path="/woodcutting" component={WoodcuttingPage} />
-            <Route path="/mining" component={MiningPage} />
-            <Route path="/fishing" component={FishingPage} />
-            <Route path="/cooking" component={CookingPage} />
-            <Route path="/smithing" component={SmithingPage} />
-            <Route path="/firemaking" component={FiremakingPage} />
-            <Route path="/combat" component={CombatPage} />
             <Route path="/inventory" component={InventoryPage} />
-            <Route path="/bank" component={BankPage} />
-            <Route path="/shop" component={ShopStub} />
             <Route path="/settings" component={SettingsPage} />
+
+            {/* Заглушённые — в разработке */}
+            <Route path="/shop">
+              <StubPage title="Магазин" iconName="shop" />
+            </Route>
+            <Route path="/bank">
+              <StubPage title="Банк" iconName="bank" />
+            </Route>
+            <Route path="/combat">
+              <StubPage title="Бой" iconName="combat" />
+            </Route>
+            <Route path="/woodcutting">
+              <StubPage title="Лесорубство" iconName="woodcutting" />
+            </Route>
+            <Route path="/mining">
+              <StubPage title="Шахтёрство" iconName="mining" />
+            </Route>
+            <Route path="/fishing">
+              <StubPage title="Рыбалка" iconName="fishing" />
+            </Route>
+            <Route path="/cooking">
+              <StubPage title="Кулинария" iconName="cooking" />
+            </Route>
+            <Route path="/smithing">
+              <StubPage title="Кузнечное дело" iconName="smithing" />
+            </Route>
+            <Route path="/firemaking">
+              <StubPage title="Огонь" iconName="firemaking" />
+            </Route>
+
             <Route component={NotFound} />
           </Switch>
         </div>

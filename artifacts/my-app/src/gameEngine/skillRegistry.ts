@@ -6,7 +6,7 @@ import { COOKING_RECIPES_MAP } from '../data/cooking';
 import { SMITHING_MAP } from '../data/smithing';
 import { FIREMAKING_MAP } from '../data/firemaking';
 import { usePlayerStore } from '../store/playerStore';
-import { useBankStore } from '../store/bankStore';
+import { useInventoryStore } from '../store/inventoryStore';
 import { calcBurnChance } from './formulas';
 import { chance, randomRange } from '../lib/utils';
 
@@ -101,11 +101,11 @@ export const skillRegistry: Record<SkillId, SkillHandler | null> = {
     process: (actionId) => {
       const recipe = COOKING_RECIPES_MAP[actionId];
       if (!recipe) return null;
-      const bankStore = useBankStore.getState();
-      if (!bankStore.hasItem(recipe.rawItemId, 1)) return null;
+      const inventoryStore = useInventoryStore.getState();
+      if (!inventoryStore.hasItem(recipe.rawItemId, 1)) return null;
       const playerLevel = usePlayerStore.getState().getSkillLevel('cooking');
       if (playerLevel < recipe.levelRequired) return null;
-      bankStore.removeItem(recipe.rawItemId, 1);
+      inventoryStore.removeItem(recipe.rawItemId, 1);
       const burnChance = calcBurnChance(playerLevel, recipe.levelRequired, recipe.burnChanceBase ?? 0.3);
       const burnt = chance(burnChance);
       const outputId = burnt ? (recipe.burntItemId ?? 'burnt_fish') : recipe.cookedItemId;
@@ -120,16 +120,16 @@ export const skillRegistry: Record<SkillId, SkillHandler | null> = {
     process: (actionId) => {
       const recipe = SMITHING_MAP[actionId];
       if (!recipe) return null;
-      const bankStore = useBankStore.getState();
+      const inventoryStore = useInventoryStore.getState();
       const playerLevel = usePlayerStore.getState().getSkillLevel('smithing');
       if (playerLevel < recipe.levelRequired) return null;
       // Check ingredients
       for (const ing of recipe.ingredients) {
-        if (!bankStore.hasItem(ing.itemId, ing.quantity)) return null;
+        if (!inventoryStore.hasItem(ing.itemId, ing.quantity)) return null;
       }
       // Consume ingredients
       for (const ing of recipe.ingredients) {
-        bankStore.removeItem(ing.itemId, ing.quantity);
+        inventoryStore.removeItem(ing.itemId, ing.quantity);
       }
       return { items: [{ itemId: recipe.outputItemId, quantity: recipe.outputQuantity ?? 1 }], xpGained: recipe.xp, masteryXpGained: recipe.masteryXp ?? 3 };
     },
@@ -142,11 +142,11 @@ export const skillRegistry: Record<SkillId, SkillHandler | null> = {
     process: (actionId) => {
       const log = FIREMAKING_MAP[actionId];
       if (!log) return null;
-      const bankStore = useBankStore.getState();
+      const inventoryStore = useInventoryStore.getState();
       const playerLevel = usePlayerStore.getState().getSkillLevel('firemaking');
       if (playerLevel < log.levelRequired) return null;
-      if (!bankStore.hasItem(log.logId, 1)) return null;
-      bankStore.removeItem(log.logId, 1);
+      if (!inventoryStore.hasItem(log.logId, 1)) return null;
+      inventoryStore.removeItem(log.logId, 1);
       const items: { itemId: string; quantity: number }[] = [];
       if (log.ashId) items.push({ itemId: log.ashId, quantity: 1 });
       return { items, xpGained: log.xp, masteryXpGained: log.masteryXp ?? 3 };

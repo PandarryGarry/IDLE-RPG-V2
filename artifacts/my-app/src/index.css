@@ -199,3 +199,29 @@
   from { transform: scaleX(1); }
   to   { transform: scaleX(0); }
 }
+
+
+/* ── ItemCard v2: появление карточек лесенкой ── */
+@keyframes card-in {
+  from { opacity: 0; transform: scale(0.88) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.card-in { animation: card-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+/* ── Числа не прыгают при изменении ── */
+.tabular-nums { font-variant-numeric: tabular-nums; }
+
+
+/* ── ItemModal: шторка снизу (моб) + поп (десктоп) ── */
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+@keyframes modal-pop {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

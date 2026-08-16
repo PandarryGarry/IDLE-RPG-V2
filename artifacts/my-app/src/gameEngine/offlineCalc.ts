@@ -13,7 +13,7 @@ import { WOODCUTTING_TREES_MAP } from '../data/woodcutting';
 import { MINING_ROCKS_MAP } from '../data/mining';
 import { FISHING_SPOTS_MAP } from '../data/fishing';
 import { usePlayerStore } from '../store/playerStore';
-import { useBankStore } from '../store/bankStore';
+import { useInventoryStore } from '../store/inventoryStore';
 import { useNotificationsStore } from '../store/notificationsStore';
 import { useResourceStore } from '../store/resourceStore';
 import {
@@ -106,7 +106,7 @@ export function calculateOfflineProgress(
   const xpPerAction = getXpPerAction(skillId, actionId);
 
   const playerStore = usePlayerStore.getState();
-  const bankStore = useBankStore.getState();
+  const inventoryStore = useInventoryStore.getState();
   const notifs = useNotificationsStore.getState();
   const resourceStore = useResourceStore.getState();
 
@@ -147,12 +147,12 @@ export function calculateOfflineProgress(
     if (leveledUp) levelUps.push({ skillId, newLevel });
   }
 
-  // Apply items — gathering only, respecting bank capacity
+  // Apply items — gathering only, respecting inventory capacity
   if (isGathering) {
     const itemPerAction = getGatheringOutputItem(skillId, actionId);
     if (itemPerAction && itemPerAction.qty > 0) {
       const totalQty = itemPerAction.qty * totalActions;
-      const added = bankStore.addItem(itemPerAction.itemId, totalQty);
+      const added = inventoryStore.addItem(itemPerAction.itemId, totalQty);
       if (added) {
         itemsGained.push({ itemId: itemPerAction.itemId, quantity: totalQty });
       }

@@ -119,7 +119,7 @@ export function MobileNav({ className }: MobileNavProps) {
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
               className={cn(
-                'fixed z-50 bg-card border-border p-4 pb-5 max-h-[70vh] overflow-y-auto overscroll-contain',
+                'fixed z-50 bg-card border-white/5 p-4 pb-5 max-h-[70vh] overflow-y-auto overscroll-contain',
                 // mobile: шторка от края до края
                 'bottom-[calc(3.5rem+env(safe-area-inset-bottom))] inset-x-0 border-t rounded-t-2xl',
                 // md+: центрированная карточка над доком
@@ -127,14 +127,14 @@ export function MobileNav({ className }: MobileNavProps) {
               )}
             >
               {/* Drag handle */}
-              <div className="w-10 h-1 bg-border rounded-full mx-auto mb-4" />
+              <div className="w-10 h-1 bg-white/10 rounded-full mx-auto mb-4" />
 
               {/* Заголовок попапа */}
               <div className="flex items-center justify-between mb-3 px-1">
                 <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">
                   {activeTab.label}
                 </p>
-                <span className="text-[8px] px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/30 font-bold uppercase tracking-wider">
+                <span className="text-[8px] px-1.5 py-0.5 rounded-md bg-indigo-500/15 text-indigo-300 font-bold uppercase tracking-wider">
                   Sketch
                 </span>
               </div>
@@ -144,13 +144,13 @@ export function MobileNav({ className }: MobileNavProps) {
                 {activeTab.subItems.map(item => (
                   <div
                     key={item.label}
-                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border bg-background/60 opacity-60 cursor-not-allowed select-none"
+                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white/5 opacity-60 cursor-not-allowed select-none"
                   >
                     <item.icon className="w-6 h-6 text-muted-foreground" />
                     <span className="text-[10px] font-bold text-center text-foreground">
                       {item.label}
                     </span>
-                    <span className="flex items-center gap-1 text-[8px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold uppercase tracking-wider">
+                    <span className="flex items-center gap-1 text-[8px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 font-bold uppercase tracking-wider">
                       <Construction className="w-2.5 h-2.5" />
                       In Dev
                     </span>
@@ -171,7 +171,7 @@ export function MobileNav({ className }: MobileNavProps) {
         }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
         className={cn(
-          'fixed z-40 bg-card/95 backdrop-blur-md border-border flex items-stretch',
+          'fixed z-40 bg-card/95 backdrop-blur-md border-white/5 flex items-stretch',
           // mobile: от края до края
           'bottom-0 inset-x-0 border-t',
           'h-[calc(3.5rem+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)]',
@@ -188,7 +188,7 @@ export function MobileNav({ className }: MobileNavProps) {
             className={cn(
               'relative flex-1 md:flex-none md:w-20 flex flex-col items-center justify-center gap-0.5',
               'text-[11px] font-bold transition-colors',
-              openTab === tab.id ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+              openTab === tab.id ? 'text-indigo-300' : 'text-muted-foreground hover:text-foreground'
             )}
             title={tab.label}
           >
