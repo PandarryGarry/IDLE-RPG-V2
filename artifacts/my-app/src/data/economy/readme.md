@@ -1,20 +1,46 @@
-## 📄 `data/economy/README.md`
-
-```markdown
 # 💰 Экономика (`data/economy/`)
 
-Единая система для всех чисел игры: цены, XP, скорость, бонусы.
+Единая система всех чисел игры: **цены, XP, скорость, бонусы, качество**.
+
 **Главный принцип:** базы отдельно, модификаторы отдельно, эффективные значения — через агрегатор.
+
+---
+
+## 🧠 Модель качества (ВАЖНО)
+
+| Понятие | Что даёт | Где хранится |
+|---|---|---|
+| **Тир (1-12)** | ТОЛЬКО визуальная бирка `T1..T12` (нумерация носимых предметов) | `items/tiers.ts` |
+| **Грейд** | Цвет фона карточки + **бонусы** | `items/grades.ts` (цвет) + `modifiers/` (бонусы) |
+
+**Грейд делится на 2 вида:**
+- **Ресурсы/крафт** (бревна, руда, рыба) → цвет + бонусы к цене/XP/скорости (`resourceBonuses.ts`)
+- **Экипировка/оружие/инструменты** → цвет + множитель статов (`gearBonuses.ts`, `toolBonuses.ts`)
+
+**Тиры бонусов НЕ дают.** Это просто метка уровня предмета.
+
+---
 
 ## 📁 Структура
 
-| Файл | Что хранит |
-|---|---|
-| `prices.ts` | NPC-цены выкупа по `itemId` (база) |
-| `xp.ts` | Базовый XP по ключу `${skill}.${itemId}` |
-| `speed.ts` | Базовый interval (мс) по ключу `${skill}.${itemId}` |
-| `modifiers.ts` | Таблицы бонусов (тир, погода, зелья, экипировка) |
-| `index.ts` | **Агрегатор** — единая точка доступа |
+```
+data/economy/
+├── prices.ts    ← NPC-цены по itemId (база)
+├── xp.ts        ← базовый XP по ключу skill.itemId
+├── speed.ts     ← базовый interval (мс) по ключу skill.itemId
+├── modifiers/
+│   ├── types.ts           ← BonusEntry, EconomyContext, MAX_BONUS_PERCENT
+│   ├── toolBonuses.ts     ← грейд инструмента → скорость фарма
+│   ├── gearBonuses.ts     ← грейд экипировки/оружия → множитель статов
+│   ├── resourceBonuses.ts ← грейд ресурса → цена/XP/скорость
+│   ├── weatherBonuses.ts  ← погода (заглушка)
+│   ├── runeBonuses.ts     ← руны (заглушка)
+│   └── index.ts           ← collectBonuses + геттеры модификаторов
+├── index.ts     ← АГРЕГАТОР (единая точка доступа)
+└── README.md
+```
+
+---
 
 ## 🎯 Ключевая идея
 
@@ -23,8 +49,10 @@
 ```
 
 - **База** (prices/xp/speed) — «чистые» числа без контекста
-- **Модификаторы** (modifiers) — источники бонусов в % (тир инструмента, зелья, погода)
+- **Модификаторы** (modifiers) — источники бонусов (грейды, зелья, погода)
 - **Агрегатор** (`index.ts`) — собирает всё и возвращает итог
+
+---
 
 ## 🚀 Использование
 
@@ -35,24 +63,26 @@ import {
   getEffectiveXp,
   getEffectiveInterval,
   getEffectivePrice,
+  getEffectiveEquipmentStats,
   actionKey,
 } from '@/data/economy';
 
-// XP за действие (с учётом инструмента и других бонусов)
+// Ресурс с грейдом + инструмент с грейдом
 const xp = getEffectiveXp(
   actionKey('woodcutting', 'oak_logs'),
-  { toolTier: 2 }
-); // = 14 × 1.05 = 15
+  {
+    toolGrade: 'rare',     // +10% скорость от инструмента
+    itemGrade: 'uncommon', // +5% XP, ×1.2 цена от ресурса
+  }
+);
 
-// Скорость действия (мс)
-const interval = getEffectiveInterval(
-  actionKey('woodcutting', 'oak_logs'),
-  { toolTier: 2 }
-); // = 4000 × 0.95 = 3800мс
+// Цена ресурса с грейдом
+const price = getEffectivePrice('oak_logs', { itemGrade: 'rare' });
+// = 2 × 1.5 = 3
 
-// Цена продажи предмета (с учётом тира/редкости)
-const price = getEffectivePrice('charcoal', { tier: 2 });
-// = 3 × 1.6 (TIER_PRICE_MULT) = 5
+// Статы оружия с учётом грейда
+const stats = getEffectiveEquipmentStats(item);
+// baseStats × GEAR_GRADE_MULT[item.grade]
 ```
 
 ### Для интерфейсов / тултипов
@@ -60,18 +90,21 @@ const price = getEffectivePrice('charcoal', { tier: 2 });
 ```ts
 import { describeEffective, actionKey } from '@/data/economy';
 
-const info = describeEffective(actionKey('woodcutting', 'oak_logs'), { toolTier: 2 });
+const info = describeEffective(actionKey('woodcutting', 'oak_logs'), {
+  toolGrade: 'rare',
+  itemGrade: 'uncommon',
+});
 // {
 //   key: 'woodcutting.oak_logs',
 //   baseXp: 14,
 //   baseInterval: 4000,
-//   bonuses: [{ source: 'tool_tier', stat: 'speed', percent: 5 }],
-//   effectiveXp: 14,
-//   effectiveInterval: 3800,
+//   bonuses: [{ source: 'tool_grade', stat: 'speed', percent: 10 }],
+//   effectiveXp: 15,
+//   effectiveInterval: 3600,
 // }
 ```
 
-`describeEffective` возвращает **разбор** — можно показывать игроку: «Топор T2: +5% к скорости».
+`describeEffective` возвращает **разбор** — можно показывать игроку: «Инструмент rare: +10% к скорости».
 
 ### Чистые базы (без бонусов)
 
@@ -82,8 +115,28 @@ import { getBaseXp, getBaseInterval, getBasePrice } from '@/data/economy';
 
 getBaseXp('woodcutting.oak_logs');       // 14
 getBaseInterval('woodcutting.oak_logs'); // 4000
-getBasePrice('charcoal');                // 3
+getBasePrice('oak_logs');                // 2
 ```
+
+---
+
+## 🔌 Как подключить к предметам
+
+В `items/index.ts` цены подмешиваются через фасад:
+
+```ts
+import { getBasePrice } from '../economy/prices';
+function withEconomy(item: Item): Item {
+  return { ...item, sellValue: getBasePrice(item.id) };
+}
+```
+
+Для **эффективной** цены (с учётом грейда) интерфейсы вызывают
+`getEffectivePrice(item.id, { itemGrade: item.grade })`, а не `item.sellValue`.
+
+`ItemCard` читает цвет из `items/grades.ts` (`item.grade`) и бирку из `items/tiers.ts` (`item.tier`).
+
+---
 
 ## 🔧 Как расширять
 
@@ -97,92 +150,109 @@ getBasePrice('charcoal');                // 3
 
 Допустим, хотим добавить **зелья скорости**:
 
-**Шаг 1.** Расширить `EconomyContext` в `modifiers.ts`:
+**Шаг 1.** Создать файл `modifiers/potionBonuses.ts`:
 
 ```ts
-export interface EconomyContext {
-  toolTier?: number;
-  potions?: string[]; // ← новое
-}
-```
+import type { BonusEntry } from './types';
 
-**Шаг 2.** Добавить таблицу:
-
-```ts
 export const POTION_BONUS: Record<string, BonusEntry> = {
   haste: { source: 'potion_haste', stat: 'speed', percent: 15 },
   xp_boost: { source: 'potion_xp', stat: 'xp', percent: 20 },
 };
 ```
 
-**Шаг 3.** Добавить в `collectBonuses`:
+**Шаг 2.** Расширить `EconomyContext` в `modifiers/types.ts`:
 
 ```ts
+export interface EconomyContext {
+  toolGrade?: string;
+  potions?: string[]; // ← новое
+  weather?: string;
+}
+```
+
+**Шаг 3.** Добавить в `collectBonuses` (`modifiers/index.ts`):
+
+```ts
+import { POTION_BONUS } from './potionBonuses';
+
 export function collectBonuses(ctx: EconomyContext): BonusEntry[] {
   const out: BonusEntry[] = [];
-  if (ctx.toolTier && TOOL_TIER_BONUS[ctx.toolTier])
-    out.push(TOOL_TIER_BONUS[ctx.toolTier]);
+
+  if (ctx.toolGrade && TOOL_GRADE_BONUS[ctx.toolGrade as GradeId]) {
+    out.push(TOOL_GRADE_BONUS[ctx.toolGrade as GradeId]);
+  }
+
   // НОВОЕ:
   if (ctx.potions) {
     for (const p of ctx.potions) {
       if (POTION_BONUS[p]) out.push(POTION_BONUS[p]);
     }
   }
+
   return out;
 }
+```
+
+**Шаг 4.** Реэкспортировать из `modifiers/index.ts`:
+
+```ts
+export * from './potionBonuses';
 ```
 
 Всё! Теперь `getEffectiveXp/Interval` подхватят зелья автоматически.
 
 ### Добавить новую погоду
 
-В `modifiers.ts` раскомментировать нужную строку:
+**Шаг 1.** Раскомментировать/добавить в `weatherBonuses.ts`:
 
 ```ts
 export const WEATHER_EFFECTS: Record<string, WeatherEffect> = {
   clear: {},
   rain: {
-    speedMult: { woodcutting: 1.25 }, // дольше фармится
-    xpMult: { woodcutting: 1.2 },     // но больше XP
-    priceMult: { log: 1.2 },          // и дороже
+    speedMult: { woodcutting: 1.25 }, // на 25% медленнее
+    xpMult: { woodcutting: 1.2 },     // но на 20% больше XP
+    priceMult: { log: 1.2 },          // и на 20% дороже
   },
 };
 ```
 
-И добавить обработку в `collectBonuses`.
+**Шаг 2.** Добавить обработку в `collectBonuses` (аналогично зельям).
 
 ### Настроить баланс
 
-**Цены:** править `prices.ts`  
-**XP:** править `xp.ts`  
-**Скорость:** править `speed.ts`  
-**Сила бонусов:** править таблицы в `modifiers.ts`  
-**Капы:** править `MAX_BONUS_PERCENT` в `modifiers.ts`
+| Что | Где править |
+|---|---|
+| Базовые цены | `prices.ts` |
+| Базовый XP | `xp.ts` |
+| Базовая скорость | `speed.ts` |
+| Сила грейд-бонусов ресурсов | `modifiers/resourceBonuses.ts` |
+| Множители статов экипировки | `modifiers/gearBonuses.ts` |
+| Бонус скорости инструмента | `modifiers/toolBonuses.ts` |
+| Капы бонусов | `modifiers/types.ts` (`MAX_BONUS_PERCENT`) |
+| Цвета грейдов | `items/grades.ts` |
+| Цвета/бирки тиров | `items/tiers.ts` |
+
+---
 
 ## ⚠️ Правила
 
-1. **Не дублируй числа.** Если число — цена/Xp/скорость, оно только в одном файле.
+1. **Не дублируй числа** — каждое число живёт ровно в одном файле.
 2. **Используй `actionKey(skill, itemId)`** для единообразия ключей.
 3. **Капы существуют** (`MAX_BONUS_PERCENT`) — не обходи их в коде.
-4. **Стекание бонусов аддитивное** (проценты складываются). Если нужен мультипликативный — добавь новый тип `BonusStat`.
+4. **Стекание бонусов аддитивное** (проценты складываются). Грейд-множители — мультипликативные (отдельный слой).
 5. **`getEffectiveInterval` имеет минимум 200мс** — чтобы не получить бесконечную скорость.
+6. **Тиры не трогают экономику** — они только визуал.
 
-## 🔮 Будущее
+---
 
-Почва заложена под:
+## 🔮 Будущее (почва заложена)
 
-- **Погода** (в `modifiers.ts` уже есть заготовка `WEATHER_EFFECTS`)
-- **Зелья** (`POTION_BONUS` добавляется по шаблону выше)
+- **Погода** (в `modifiers/weatherBonuses.ts` есть заготовка `WEATHER_EFFECTS`)
+- **Зелья** (`potionBonuses.ts` добавляется по шаблону выше)
 - **Заточка инструментов** (новая таблица + поле в `EconomyContext`)
 - **Бижутерия/броня** (аналогично, новая таблица + поля)
 - **Бафы гильдии** (новая таблица)
 - **Аукцион** (отдельная система, читает `getBasePrice` как ориентир)
 
 Сигнатуры `getEffectiveXp/Interval/Price` при этом **не меняются** — просто расширяется `EconomyContext`.
-```
-
----
-
-Создай файл `data/economy/README.md`, удали `data/balance.ts` (после проверки отсутствия импортов) — и **первый шаг новой архитектуры закрыт**: у тебя готовая, расширяемая система экономики.
-
-Когда захочешь подключать её к механикам (начиная с пилота `woodcutting`) — скажи, и я покажу, как именно заменить хардкод в skill-файлах на вызовы `getEffectiveXp/Interval`.

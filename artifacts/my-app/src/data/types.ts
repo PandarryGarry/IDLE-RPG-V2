@@ -16,13 +16,22 @@ export const CRAFTING_SKILLS: SkillId[] = ['firemaking', 'cooking', 'smithing', 
 export const OTHER_SKILLS: SkillId[] = ['farming', 'agility', 'summoning', 'astrology', 'township', 'thieving'];
 export const ALL_SKILL_IDS: SkillId[] = [...COMBAT_SKILLS, ...GATHERING_SKILLS, ...CRAFTING_SKILLS, ...OTHER_SKILLS];
 
+// ── Грейды (цветовое отличие, влияет на цену/скорость/XP) ─────
+export type GradeId = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+export const GRADE_IDS: GradeId[] = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
+
+// ── Типы оружия (у каждого свой профиль статов) ──────────────
+export type WeaponTypeId = 'dagger' | 'sword' | 'twoHander' | 'bow' | 'crossbow' | 'staff';
+export const WEAPON_TYPE_IDS: WeaponTypeId[] = ['dagger', 'sword', 'twoHander', 'bow', 'crossbow', 'staff'];
+
 export type ItemCategory =
   | 'weapon' | 'helm' | 'platebody' | 'platelegs' | 'boots' | 'gloves'
   | 'amulet' | 'ring' | 'shield' | 'cape'
   | 'food' | 'herb' | 'seed' | 'bar' | 'ore' | 'log' | 'rune'
-  | 'potion' | 'raw_fish' | 'cooked_fish' | 'gem' | 'misc' | 'bone' | 'ash' | 'arrow' | 'tablet' | 'charcoal';
+  | 'potion' | 'raw_fish' | 'cooked_fish' | 'gem' | 'misc' | 'bone' | 'ash' | 'arrow' | 'tablet' | 'charcoal'
+  | 'tool';
 
-export type EquipSlot = 'helm' | 'platebody' | 'platelegs' | 'boots' | 'gloves' | 'amulet' | 'ring' | 'weapon' | 'shield' | 'cape' | 'quiver' | 'passive';
+export type EquipSlot = 'helm' | 'platebody' | 'platelegs' | 'boots' | 'gloves' | 'amulet' | 'ring' | 'weapon' | 'shield' | 'cape' | 'quiver' | 'passive' | 'tool';
 
 export interface CombatStats {
   attackBonus?: number;
@@ -33,6 +42,9 @@ export interface CombatStats {
   magicAttackBonus?: number;
   magicDamageBonus?: number;
   prayerBonus?: number;
+  // Подготовка под характеристики персонажа и скорость
+  attackSpeed?: number;
+  agility?: number;
 }
 
 export interface Item {
@@ -49,8 +61,16 @@ export interface Item {
   combatStats?: CombatStats;
   icon?: string; // emoji fallback
   tier?: number; // 1-8 для предметов с качеством (уголь, инструменты и т.д.)
-  burnDuration?: number; // время удержания жара в секундах (для угля)
+  // ── Грейды / оружие / руны ──
+  grade?: GradeId;              // цветовое отличие (common..legendary)
+  weaponType?: WeaponTypeId;    // тип оружия (профиль статов)
+  baseStats?: CombatStats;      // базовые статы ДО тира/рун
+  runeSlots?: number;           // ячеек под руны (сейчас 0)
+  appliedRunes?: string[];      // применённые руны (сейчас [])
+  fullBody?: boolean;           // НОВОЕ: занимает platebody + platelegs (комбинезон)
+  burnDuration?: number;        // время удержания жара в секундах (для угля)
 }
+
 
 export interface SkillState {
   level: number;
@@ -68,7 +88,7 @@ export interface SkillAction {
   xp: number;
   masteryXp?: number;
   interval: number; // ms per action
-  // ── НОВОЕ: истощение ресурса (для gathering-нод) ──
+  // ── Истощение ресурса (для gathering-нод) ──
   stockLimit?: number;  // сколько действий можно сделать до истощения
   respawnMs?: number;   // время восстановления (мс)
 }
@@ -192,7 +212,8 @@ export interface Equipment {
   passive: string | null;
 }
 
-export interface BankSlot {
+// ── БЫЛО BankSlot → СТАЛО ItemSlot (слот хранит предмет, не привязан к «банку») ──
+export interface ItemSlot {
   itemId: string;
   quantity: number;
   locked: boolean;
@@ -233,8 +254,9 @@ export interface SaveData {
     skills: Record<SkillId, SkillState>;
     equipment: Equipment;
   };
-  bank: {
-    items: BankSlot[];
+  // ── БЫЛО bank → СТАЛО inventory (одно хранилище = инвентарь) ──
+  inventory: {
+    items: ItemSlot[];
     gp: number;
     maxSlots: number;
   };

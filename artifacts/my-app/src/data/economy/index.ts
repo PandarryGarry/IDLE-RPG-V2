@@ -1,37 +1,79 @@
 // ═══════════════════════════════════════════════════════════════
-// ФАСАД: агрегирует предметы из подмодулей + экономику из economy/prices
-// Предметы хранят только "ЧТО" — цены подмешиваются здесь.
-// getItem / getAllItems — стабильный публичный API (ничего не ломается)
+// АГРЕГАТОР ЭКОНОМИКИ — единая точка доступа для интерфейсов/механик.
+// База (prices/xp/speed) × модификаторы (modifiers) = эффективное значение.
+//
+// МОДЕЛЬ КАЧЕСТВА:
+//   Тир (1-12)  — только визуальная бирка, бонусов НЕ даёт.
+//   Грейд       — цвет + бонусы (ресурсы: цена/XP/скорость; экипировка: статы).
 // ═══════════════════════════════════════════════════════════════
 
-import type { Item } from '../types';
-import { getBasePrice } from '../economy/prices';  // ← импорт из economy/
-import { GATHERED_ITEMS } from './gathered';
-import { CRAFTED_ITEMS } from './crafted';
-import { EQUIPMENT_ITEMS } from './equipment';
-import { MISC_ITEMS } from './misc';
+import type { GradeId } from '../types';
+import { getBasePrice } from './prices';
+import { getBaseXp } from './xp';
+import { getBaseInterval } from './speed';
+import {
+  collectBonuses,
+  MAX_BONUS_PERCENT,
+  getResourcePriceModifier,
+  getResourceXpModifier,
+  getResourceSpeedModifier,
+  getEffectiveEquipmentStats,
+  type BonusStat,
+  type EconomyContext,
+} from './modifiers';
 
-// Подмешиваем экономику: sellValue приходит из economy/prices.ts
-function withEconomy(item: Item): Item {
-  return { ...item, sellValue: getBasePrice(item.id) };
+/** Расширенный контекст расчёта */
+export interface CalcContext extends EconomyContext {
+  /** Грейд предмета (ресурса) — влияет на цену/XP/скорость */
+  itemGrade?: GradeId;
 }
 
-const ITEMS: Record<string, Item> = {};
-for (const raw of [
-  ...Object.values(GATHERED_ITEMS),
-  ...Object.values(CRAFTED_ITEMS),
-  ...Object.values(EQUIPMENT_ITEMS),
-  ...Object.values(MISC_ITEMS),
-]) {
-  ITEMS[raw.id] = withEconomy(raw);
+export function actionKey(skill: string, itemId: string): string {
+  return `${skill}.${itemId}`;
 }
 
-export default ITEMS;
-
-export function getItem(id: string): Item | undefined {
-  return ITEMS[id];
+// ── Суммирование бонусов (аддитивно, с капом) ──
+function sumBonus(stat: BonusStat, ctx: EconomyContext): number {
+  const total = collectBonuses(ctx)
+    .filter(b => b.stat === stat)
+    .reduce((s, b) => s + b.percent, 0);
+  const cap = MAX_BONUS_PERCENT[stat];
+  return Math.max(-cap, Math.min(cap, total));
 }
 
-export function getAllItems(): Item[] {
-  return Object.values(ITEMS);
+// ── Эффективные значения ──
+
+/** XP за действие: база × бонусы × грейд-множитель ресурса */
+export function getEffectiveXp(key: string, ctx: CalcContext = {}): number {
+  const base = getBaseXp(key);
+  return Math.round(base * (1 + sumBonus('xp', ctx) / 100) * getResourceXpModifier(ctx.itemGrade));
 }
+
+/** Скорость (мс): база × (1 − speedBonus) × грейд-множитель ресурса */
+export function getEffectiveInterval(key: string, ctx: CalcContext = {}): number {
+  const base = getBaseInterval(key);
+  const reduced = base * (1 - sumBonus('speed', ctx) / 100) * getResourceSpeedModifier(ctx.itemGrade);
+  return Math.max(200, Math.round(reduced)); // не быстрее 0.2с
+}
+
+/** Цена: база × грейд-множитель ресурса × бонусы цены */
+export function getEffectivePrice(itemId: string, ctx: CalcContext = {}): number {
+  const base = getBasePrice(itemId);
+  return Math.round(base * getResourcePriceModifier(ctx.itemGrade) * (1 + sumBonus('price', ctx) / 100));
+}
+
+// ── Разбор для отладки / тултипов ──
+export function describeEffective(key: string, ctx: CalcContext = {}) {
+  return {
+    key,
+    baseXp: getBaseXp(key),
+    baseInterval: getBaseInterval(key),
+    bonuses: collectBonuses(ctx),
+    effectiveXp: getEffectiveXp(key, ctx),
+    effectiveInterval: getEffectiveInterval(key, ctx),
+  };
+}
+
+// Реэкспорт базы и экипировочных статов
+export { getBasePrice, getBaseXp, getBaseInterval, getEffectiveEquipmentStats };
+export type { CalcContext as EconomyCalcContext };

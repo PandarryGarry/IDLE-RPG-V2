@@ -1,0 +1,95 @@
+// ═══════════════════════════════════════════════════════════════
+// МЕЧИ (weaponType: 'sword')
+// Сбалансированное оружие: средние скорость и урон.
+// Занимает 1 слот (weapon).
+// ═══════════════════════════════════════════════════════════════
+
+import type { Item } from '../../types';
+import { getItemIcon } from '@/lib/icons';
+
+export const SWORDS: Record<string, Item> = {
+  bronze_sword: {
+    id: 'bronze_sword',
+    name: 'Bronze Sword',
+    category: 'weapon',
+    description: 'Базовый меч из бронзы',
+    sellValue: 0, canSell: true, stackable: false,
+    equipSlot: 'weapon',
+    weaponType: 'sword',
+    tier: 1,
+    baseStats: { attackBonus: 7, strengthBonus: 8, attackSpeed: 4 },
+    icon: getItemIcon('bronze_sword'),
+  },
+  iron_sword: {
+    id: 'iron_sword',
+    name: 'Iron Sword',
+    category: 'weapon',
+    description: 'Прочный железный меч',
+    sellValue: 0, canSell: true, stackable: false,
+    equipSlot: 'weapon',
+    weaponType: 'sword',
+    tier: 2,
+    baseStats: { attackBonus: 10, strengthBonus: 12, attackSpeed: 4 },
+    icon: getItemIcon('iron_sword'),
+  },
+  steel_sword: {
+    id: 'steel_sword',
+    name: 'Steel Sword',
+    category: 'weapon',
+    description: 'Надёжный стальной клинок',
+    sellValue: 0, canSell: true, stackable: false,
+    equipSlot: 'weapon',
+    weaponType: 'sword',
+    tier: 3,
+    baseStats: { attackBonus: 15, strengthBonus: 18, attackSpeed: 4 },
+    icon: getItemIcon('steel_sword'),
+  },
+  mithril_sword: {
+    id: 'mithril_sword',
+    name: 'Mithril Sword',
+    category: 'weapon',
+    description: 'Лёгкий и острый мифриловый меч',
+    sellValue: 0, canSell: true, stackable: false,
+    equipSlot: 'weapon',
+    weaponType: 'sword',
+    tier: 4,
+    baseStats: { attackBonus: 25, strengthBonus: 30, attackSpeed: 5 },
+    icon: getItemIcon('mithril_sword'),
+  },
+  adamant_sword: {
+    id: 'adamant_sword',
+    name: 'Adamant Sword',
+    category: 'weapon',
+    description: 'Тяжёлый адамантиевый клинок',
+    sellValue: 0, canSell: true, stackable: false,
+    equipSlot: 'weapon',
+    weaponType: 'sword',
+    tier: 5,
+    baseStats: { attackBonus: 35, strengthBonus: 42, attackSpeed: 4 },
+    icon: getItemIcon('adamant_sword'),
+  },
+  rune_sword: {
+    id: 'rune_sword',
+    name: 'Rune Sword',
+    category: 'weapon',
+    description: 'Рунический меч, выкованный древними мастерами',
+    sellValue: 0, canSell: true, stackable: false,
+    equipSlot: 'weapon',
+    weaponType: 'sword',
+    tier: 6,
+    baseStats: { attackBonus: 45, strengthBonus: 54, attackSpeed: 4 },
+    icon: getItemIcon('rune_sword'),
+  },
+  dragon_sword: {
+    id: 'dragon_sword',
+    name: 'Dragon Sword',
+    category: 'weapon',
+    description: 'Легендарный драконий клинок',
+    sellValue: 0, canSell: true, stackable: false,
+    equipSlot: 'weapon',
+    weaponType: 'sword',
+    tier: 7,
+    baseStats: { attackBonus: 60, strengthBonus: 72, attackSpeed: 4 },
+    icon: getItemIcon('dragon_sword'),
+  },
+};
