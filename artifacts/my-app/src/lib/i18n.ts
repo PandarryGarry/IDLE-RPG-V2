@@ -1,3 +1,4 @@
+// src/lib/i18n.ts
 // Flat key → string translation dictionary.
 // Add all UI strings here; fall back to 'en' for missing keys.
 
@@ -39,6 +40,29 @@ const en = {
   // ── Auth / Player card ────────────────────────────────────────
   'auth.guest': 'Guest',
   'auth.login': 'Sign in',
+  'auth.logout': 'Logout',
+  'auth.loginTitle': 'Log In',
+  'auth.signUpTitle': 'Create Account',
+  'auth.loginDescription': 'Welcome back, adventurer',
+  'auth.signUpDescription': 'Start your adventure',
+  'auth.username': 'Username',
+  'auth.email': 'Email',
+  'auth.password': 'Password',
+  'auth.rememberMe': 'Remember me',
+  'auth.forgotPassword': 'Forgot password?',
+  'auth.loginButton': 'Login',
+  'auth.signUpButton': 'Sign Up',
+  'auth.alreadyMember': 'Already a member?',
+  'auth.notMember': 'Not a member?',
+  'auth.loginLink': 'Login',
+  'auth.signUpLink': 'Sign Up',
+
+  // ── Auth errors ────────────────────────────────────────────────
+  'auth.error.fillAll': 'All fields are required',
+  'auth.error.invalidCredentials': 'Invalid username or password',
+  'auth.error.emailExists': 'Email already exists',
+  'auth.error.usernameOrEmailRequired': 'Username or email is required',
+  'auth.error.passwordRequired': 'Password is required',
 
   //─────────────────────────────────────────────────
   'ui.start': 'Start', 'ui.stop': 'Stop', 'ui.level': 'Level',
@@ -193,6 +217,29 @@ const ru: Partial<Record<keyof typeof en, string>> = {
   // ── Auth / Player card ───────────────────────────────────────
   'auth.guest': 'Гость',
   'auth.login': 'Войти',
+  'auth.logout': 'Выйти',
+  'auth.loginTitle': 'Вход',
+  'auth.signUpTitle': 'Создать аккаунт',
+  'auth.loginDescription': 'С возвращением, искатель приключений',
+  'auth.signUpDescription': 'Начни своё приключение',
+  'auth.username': 'Имя пользователя',
+  'auth.email': 'Email',
+  'auth.password': 'Пароль',
+  'auth.rememberMe': 'Запомнить меня',
+  'auth.forgotPassword': 'Забыли пароль?',
+  'auth.loginButton': 'Войти',
+  'auth.signUpButton': 'Зарегистрироваться',
+  'auth.alreadyMember': 'Уже есть аккаунт?',
+  'auth.notMember': 'Нет аккаунта?',
+  'auth.loginLink': 'Войти',
+  'auth.signUpLink': 'Зарегистрироваться',
+
+  // ── Auth errors ────────────────────────────────────────────────
+  'auth.error.fillAll': 'Все поля обязательны',
+  'auth.error.invalidCredentials': 'Неверное имя пользователя или пароль',
+  'auth.error.emailExists': 'Пользователь с таким email уже существует',
+  'auth.error.usernameOrEmailRequired': 'Введите имя пользователя или email',
+  'auth.error.passwordRequired': 'Введите пароль',
 
   // ── Generic UI ────────────────────────────────────────────────
   'ui.start': 'Начать', 'ui.stop': 'Остановить', 'ui.level': 'Уровень',

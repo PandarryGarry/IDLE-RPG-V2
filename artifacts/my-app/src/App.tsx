@@ -11,9 +11,13 @@ import { TopBar } from '@/components/TopBar';
 import { SideMenu } from '@/components/SideMenu';
 import { NotificationToast } from '@/components/NotificationToast';
 import { useUIStore } from '@/store/uiStore';
+import { useAuthStore } from '@/store/authStore';
+import { SplashScreen } from '@/components/SplashScreen';
+import StartPage from './pages/StartPage';  // ← правильный импорт (default)
+import { AuthModal } from '@/components/AuthModal';
 import { UI_ICONS } from '@/lib/icons';
 
-// ── Активные страницы (пилот: инвентарь) ──
+// ── Активные страницы ──
 import { DashboardPage } from '@/pages/DashboardPage';
 import { InventoryPage } from '@/pages/InventoryPage';
 import { SettingsPage } from '@/pages/SettingsPage';
@@ -52,30 +56,22 @@ function Router() {
 
   return (
     <div className="flex min-h-screen bg-background text-foreground selection:bg-primary/30">
-      {/* Desktop sidebar — hidden on mobile */}
       <div className="hidden md:block">
         <Sidebar />
       </div>
 
-      {/* SideMenu — выдвижное меню для мобильных */}
       <SideMenu />
 
-      {/* Main content — 240px offset on desktop, full-width on mobile */}
       <main className="flex-1 md:ml-60 min-h-screen overflow-x-hidden">
-        {/* TopBar — новая верхняя панель */}
         <TopBar />
-
-        {/* NotificationToast — размещаем сразу под TopBar */}
         <NotificationToast />
 
         <div className="w-full max-w-[1440px] mx-auto px-3 py-4 pb-20 sm:px-4 md:pb-28 md:px-6 lg:px-8">
           <Switch>
-            {/* Активные страницы */}
             <Route path="/" component={DashboardPage} />
             <Route path="/inventory" component={InventoryPage} />
             <Route path="/settings" component={SettingsPage} />
 
-            {/* Заглушённые — в разработке */}
             <Route path="/shop">
               <StubPage title="Магазин" iconName="shop" />
             </Route>
@@ -109,15 +105,20 @@ function Router() {
         </div>
       </main>
 
-      {/* Док: мобильный + десктопный (адаптивность внутри компонента) */}
       <MobileNav />
-
       <Toaster />
     </div>
   );
 }
 
 function App() {
+  const isSplashVisible = useUIStore(s => s.isSplashVisible);
+  const { isAuthenticated, checkSession } = useAuthStore();
+
+  useEffect(() => {
+    checkSession();
+  }, [checkSession]);
+
   useEffect(() => {
     initGame();
     tickManager.start();
@@ -127,11 +128,25 @@ function App() {
     };
   }, []);
 
+  if (isSplashVisible) {
+    return <SplashScreen />;
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <>
+        <StartPage />
+        <AuthModal />
+      </>
+    );
+  }
+
   return (
     <TooltipProvider delayDuration={300}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
         <Router />
       </WouterRouter>
+      <AuthModal />
     </TooltipProvider>
   );
 }

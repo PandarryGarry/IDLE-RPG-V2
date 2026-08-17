@@ -3,14 +3,13 @@ import { Link, useLocation } from 'wouter';
 import { useTranslation } from '@/hooks/useTranslation';
 import { usePlayerStore } from '@/store/playerStore';
 import { useGameStore } from '@/store/gameStore';
+import { useAuthStore } from '@/store/authStore';
+import { useUIStore } from '@/store/uiStore';
 import { SkillId, COMBAT_SKILLS, GATHERING_SKILLS, CRAFTING_SKILLS, OTHER_SKILLS } from '@/data/types';
 import { SkillCircle } from '@/components/SkillCircle';
 import { getGroupIcon } from '@/lib/icons';
 import { cn } from '@/lib/utils';
-import { Home, User, Backpack, Coins, Store, Settings, Flame, LogIn, UserCircle } from 'lucide-react';
-
-// TODO: заменить на реальное состояние авторизации, когда появится auth
-const isAuthenticated = false;
+import { Home, User, Backpack, Coins, Store, Settings, Flame, LogIn, UserCircle, LogOut } from 'lucide-react';
 
 // ═══════════════════════════════════════════════════════════════
 // ЛОГОТИП (индиго, как акценты инвентаря)
@@ -237,29 +236,51 @@ export function MenuContent({ onNavigate }: { onNavigate?: () => void }) {
 export function PlayerCard({ onNavigate }: { onNavigate?: () => void }) {
   const { t } = useTranslation();
   const combatLevel = usePlayerStore(s => s.combatLevel);
+  const { user, isAuthenticated, logout } = useAuthStore();
+  const openAuthModal = useUIStore(s => s.openAuthModal);
+
+  const handleLogout = () => {
+    logout();
+    if (onNavigate) onNavigate();
+  };
+
+  const handleSignIn = () => {
+    openAuthModal();
+    if (onNavigate) onNavigate(); // закрыть меню после открытия модалки
+  };
 
   return (
-    <Link href="/character" onClick={onNavigate} className="block group">
-      <div className="flex items-center gap-2 p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all">
-        <div className="w-9 h-9 shrink-0 rounded-full bg-white/10 flex items-center justify-center">
-          <UserCircle className="w-5 h-5 text-muted-foreground group-hover:text-indigo-300 transition-colors" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[11px] font-bold text-foreground truncate leading-tight">
-            {t('auth.guest')}
+    <div className="flex items-center gap-2 p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all">
+      <div className="w-9 h-9 shrink-0 rounded-full bg-white/10 flex items-center justify-center">
+        <UserCircle className="w-5 h-5 text-muted-foreground group-hover:text-indigo-300 transition-colors" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[11px] font-bold text-foreground truncate leading-tight">
+          {isAuthenticated ? user?.name || t('auth.guest') : t('auth.guest')}
+        </p>
+        {isAuthenticated && (
+          <p className="text-[9px] text-muted-foreground font-mono leading-tight">
+            {getGroupIcon('combat')} {t('combat.combatLevel')}: {combatLevel}
           </p>
-          {/* Combat Lvl показывается только после авторизации */}
-          {isAuthenticated && (
-            <p className="text-[9px] text-muted-foreground font-mono leading-tight">
-              {getGroupIcon('combat')} {t('combat.combatLevel')}: {combatLevel}
-            </p>
-          )}
-        </div>
-        <div className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-md bg-indigo-500/15 text-indigo-300 text-[10px] font-bold group-hover:bg-indigo-500/25 transition-colors">
+        )}
+      </div>
+      {isAuthenticated ? (
+        <button
+          onClick={handleLogout}
+          className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-md bg-red-500/15 text-red-300 text-[10px] font-bold hover:bg-red-500/25 transition-colors"
+        >
+          <LogOut className="w-3 h-3" />
+          {t('auth.logout') || 'Logout'}
+        </button>
+      ) : (
+        <button
+          onClick={handleSignIn}
+          className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-md bg-indigo-500/15 text-indigo-300 text-[10px] font-bold hover:bg-indigo-500/25 transition-colors"
+        >
           <LogIn className="w-3 h-3" />
           {t('auth.login')}
-        </div>
-      </div>
-    </Link>
+        </button>
+      )}
+    </div>
   );
 }
