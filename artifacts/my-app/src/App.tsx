@@ -13,13 +13,13 @@ import { NotificationToast } from '@/components/NotificationToast';
 import { useUIStore } from '@/store/uiStore';
 import { useAuthStore } from '@/store/authStore';
 import { SplashScreen } from '@/components/SplashScreen';
-import StartPage from './pages/StartPage';  // ← правильный импорт (default)
+import StartPage from './pages/StartPage';
 import { AuthModal } from '@/components/AuthModal';
-import { UI_ICONS } from '@/lib/icons';
 
 // ── Активные страницы ──
 import { DashboardPage } from '@/pages/DashboardPage';
 import { InventoryPage } from '@/pages/InventoryPage';
+import { CharacterPage } from '@/pages/CharacterPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { StubPage } from '@/pages/StubPage';
 
@@ -70,6 +70,7 @@ function Router() {
           <Switch>
             <Route path="/" component={DashboardPage} />
             <Route path="/inventory" component={InventoryPage} />
+            <Route path="/character" component={CharacterPage} />
             <Route path="/settings" component={SettingsPage} />
 
             <Route path="/shop">
@@ -120,6 +121,13 @@ function App() {
   }, [checkSession]);
 
   useEffect(() => {
+    // ── React смонтирован — плавно убираем статичный boot-splash из index.html ──
+    const boot = document.getElementById('boot-splash');
+    if (boot) {
+      boot.classList.add('fade-out');
+      setTimeout(() => boot.remove(), 400);
+    }
+
     initGame();
     tickManager.start();
     document.documentElement.classList.add('dark');

@@ -3,6 +3,7 @@ import { useAuthStore } from '@/store/authStore';
 
 export default function StartPage() {
   const openAuthModal = useUIStore(s => s.openAuthModal);
+  const playAsGuest = useAuthStore(s => s.playAsGuest);
   const { isAuthenticated } = useAuthStore();
 
   if (isAuthenticated) return null;
@@ -40,10 +41,10 @@ export default function StartPage() {
         </div>
 
         <h2 className="text-xl font-bold mt-4 text-foreground/90">
-          A multi-purpose UI system
+          Your adventure never sleeps
         </h2>
         <p className="text-sm text-muted-foreground mt-2 max-w-xs">
-          Create your own game UI easily with this professionally handcrafted Modular Game UI Kit.
+          Chop, craft and conquer — your heroes keep working even while you're away.
         </p>
 
         <div className="mt-8 flex flex-col sm:flex-row gap-3 w-full">
@@ -54,7 +55,7 @@ export default function StartPage() {
             Log In
           </button>
           <button
-            onClick={openAuthModal}
+            onClick={playAsGuest}
             className="flex-1 py-3 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-semibold shadow-[0_4px_14px_rgba(99,102,241,0.4)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.5)] transition-all active:scale-95"
           >
             Play now
@@ -62,7 +63,7 @@ export default function StartPage() {
         </div>
 
         <p className="mt-6 text-[10px] text-muted-foreground/50 font-mono tracking-widest">
-          Modular Game UI Kit · IdleRPG
+          IdleRPG · v2.1
         </p>
       </div>
     </div>

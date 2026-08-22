@@ -1,5 +1,6 @@
 // src/store/authStore.ts
 import { create } from 'zustand';
+import { tickManager } from '@/gameEngine/tickManager';
 
 export interface AuthUser {
   name: string;
@@ -12,10 +13,11 @@ interface AuthState {
   isLoading: boolean;
 
   // actions
-  login: (identifier: string, password: string) => Promise<boolean>; // identifier может быть email или username
+  login: (identifier: string, password: string) => Promise<boolean>;
   register: (name: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
   checkSession: () => void;
+  playAsGuest: () => void;
 }
 
 // Ключи для localStorage
@@ -54,7 +56,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ user: null, isAuthenticated: false, isLoading: false });
   },
 
-  // Теперь identifier может быть email или username
   login: async (identifier: string, password: string) => {
     const users = getUsers();
     const found = users.find(u => 
@@ -72,7 +73,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   register: async (name: string, email: string, password: string) => {
     const users = getUsers();
-    // Проверяем уникальность имени и email
     if (users.some(u => u.email === email || u.name === name)) {
       return false;
     }
@@ -89,6 +89,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: () => {
     localStorage.removeItem(SESSION_KEY);
+    tickManager.stop();
     set({ user: null, isAuthenticated: false });
+  },
+
+  playAsGuest: () => {
+    const user: AuthUser = { name: 'Guest', email: '' };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    set({ user, isAuthenticated: true });
   },
 }));
